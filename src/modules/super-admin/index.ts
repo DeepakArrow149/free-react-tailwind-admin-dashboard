@@ -1,0 +1,1 @@
+export { superAdminRoutes } from './routes';

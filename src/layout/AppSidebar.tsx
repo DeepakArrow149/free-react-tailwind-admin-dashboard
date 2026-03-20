@@ -16,7 +16,6 @@ import {
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import SidebarWidget from "./SidebarWidget";
 
 type NavItem = {
   name: string;
@@ -29,65 +28,173 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+    path: "/",
+  },
+  {
+    icon: <BoxCubeIcon />,
+    name: "Master Data",
+    subItems: [
+      { name: "Buyers", path: "/master/buyers" },
+      { name: "Suppliers", path: "/master/suppliers" },
+      { name: "Materials", path: "/master/materials" },
+      { name: "Styles", path: "/master/styles" },
+      { name: "Colors", path: "/master/colors" },
+      { name: "Seasons", path: "/master/seasons" },
+      { name: "Companies", path: "/master/companies" },
+      { name: "Branches", path: "/master/branches" },
+      { name: "Buying Agents", path: "/master/buying-agents" },
+      { name: "Party Groups", path: "/master/party-groups" },
+      { name: "Sections", path: "/master/sections" },
+      { name: "Thread Qualities", path: "/master/thread-qualities" },
+      { name: "Counts", path: "/master/counts" },
+    ],
+  },
+  {
+    icon: <ListIcon />,
+    name: "Merchandising",
+    subItems: [
+      { name: "Orders", path: "/merchandising/orders" },
+      { name: "Samples", path: "/merchandising/samples" },
+      { name: "Sampling Requests", path: "/merchandising/sampling", new: true },
+      { name: "T&A Tracker", path: "/merchandising/tna" },
+    ],
+  },
+  {
+    icon: <TableIcon />,
+    name: "Costing",
+    subItems: [
+      { name: "Cost Sheets", path: "/costing/sheets" },
+      { name: "BOM", path: "/costing/bom" },
+    ],
   },
   {
     icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
-  },
-  {
-    name: "Forms",
-    icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  },
-  {
-    name: "Tables",
-    icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  },
-  {
-    name: "Pages",
-    icon: <PageIcon />,
+    name: "Planning",
     subItems: [
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
+      { name: "TNA Templates", path: "/planning/tna-templates" },
+      { name: "TNA Calendar", path: "/planning/tna" },
+      { name: "Production Targets", path: "/planning/targets" },
+      { name: "Production Plan", path: "/planning/production-plan", new: true },
+      { name: "Capacity", path: "/planning/capacity" },
+    ],
+  },
+  {
+    icon: <PageIcon />,
+    name: "Procurement",
+    subItems: [
+      { name: "RFQ", path: "/procurement/rfq", new: true },
+      { name: "Purchase Orders", path: "/procurement/po" },
+      { name: "GRN", path: "/procurement/grn" },
+      { name: "Subcontract", path: "/procurement/subcontract", new: true },
     ],
   },
 ];
 
 const othersItems: NavItem[] = [
   {
-    icon: <PieChartIcon />,
-    name: "Charts",
+    icon: <PlugInIcon />,
+    name: "Inventory",
     subItems: [
-      { name: "Line Chart", path: "/line-chart", pro: false },
-      { name: "Bar Chart", path: "/bar-chart", pro: false },
+      { name: "Stock", path: "/inventory/stock" },
+      { name: "Issue", path: "/inventory/issue" },
+      { name: "Return", path: "/inventory/return" },
+      { name: "Machines", path: "/inventory/machines", new: true },
+    ],
+  },
+  {
+    icon: <PieChartIcon />,
+    name: "Production",
+    subItems: [
+      { name: "Cutting", path: "/production/cutting" },
+      { name: "Sewing", path: "/production/sewing" },
+      { name: "Finishing", path: "/production/finishing" },
+      { name: "Op. Bulletins", path: "/production/bulletins", new: true },
+      { name: "Prod. Orders", path: "/production/orders", new: true },
+      { name: "Hourly Tracking", path: "/production/hourly", new: true },
+      { name: "Bundles", path: "/production/bundles", new: true },
+    ],
+  },
+  {
+    icon: <TableIcon />,
+    name: "Quality",
+    subItems: [
+      { name: "AQL Inspection", path: "/quality/aql" },
+      { name: "Fabric Inspection", path: "/quality/fabric" },
+      { name: "Lab Tests", path: "/quality/lab", new: true },
+      { name: "Buyer Claims", path: "/quality/claims" },
+      { name: "Endline QC", path: "/quality/endline", new: true },
     ],
   },
   {
     icon: <BoxCubeIcon />,
-    name: "UI Elements",
+    name: "Packing & Export",
     subItems: [
-      { name: "Alerts", path: "/alerts", pro: false },
-      { name: "Avatar", path: "/avatars", pro: false },
-      { name: "Badge", path: "/badge", pro: false },
-      { name: "Buttons", path: "/buttons", pro: false },
-      { name: "Images", path: "/images", pro: false },
-      { name: "Videos", path: "/videos", pro: false },
+      { name: "Packing Lists", path: "/packing/lists" },
+      { name: "Scan & Pack", path: "/packing/scan", new: true },
+      { name: "Containers", path: "/packing/containers" },
+      { name: "Export Docs", path: "/export/documents" },
+      { name: "Shipping Bills", path: "/export/shipping-bills", new: true },
+      { name: "Bill of Lading", path: "/export/bill-of-lading", new: true },
+      { name: "COO", path: "/export/coo", new: true },
+      { name: "LC Management", path: "/export/lc", new: true },
+      { name: "Export Incentives", path: "/export/incentives", new: true },
+    ],
+  },
+  {
+    icon: <PieChartIcon />,
+    name: "Finance",
+    subItems: [
+      { name: "Invoices", path: "/finance/invoices" },
+      { name: "Payments", path: "/finance/payments" },
+      { name: "Chart of Accounts", path: "/finance/chart-of-accounts", new: true },
+      { name: "Fixed Assets", path: "/finance/fixed-assets", new: true },
+      { name: "GST Returns", path: "/finance/gst-returns", new: true },
+      { name: "E-Invoice / E-Way", path: "/finance/e-invoice", new: true },
+      { name: "Bank Recon", path: "/finance/bank-recon", new: true },
+      { name: "Financial Reports", path: "/finance/reports", new: true },
+    ],
+  },
+  {
+    icon: <UserCircleIcon />,
+    name: "HRM",
+    subItems: [
+      { name: "Departments", path: "/hrm/departments" },
+      { name: "Designations", path: "/hrm/designations" },
+      { name: "Shifts", path: "/hrm/shifts", new: true },
+      { name: "Employees", path: "/hrm/employees" },
+      { name: "Attendance", path: "/hrm/attendance" },
+      { name: "Leave Types", path: "/hrm/leave-types" },
+      { name: "Leave Applications", path: "/hrm/leaves" },
+      { name: "Leave Balances", path: "/hrm/leave-balances", new: true },
+      { name: "Payroll", path: "/hrm/payroll" },
+      { name: "Loans", path: "/hrm/loans" },
+      { name: "FnF Settlement", path: "/hrm/fnf", new: true },
+      { name: "Statutory Exports", path: "/hrm/statutory-exports", new: true },
+    ],
+  },
+  {
+    icon: <GridIcon />,
+    name: "Reports",
+    subItems: [
+      { name: "MIS Dashboard", path: "/reports/dashboard" },
+      { name: "Order Status", path: "/reports/orders" },
+      { name: "Production Efficiency", path: "/reports/production-efficiency", new: true },
+      { name: "T&A Delays", path: "/reports/tna-delays", new: true },
+      { name: "Inventory Aging", path: "/reports/inventory-aging", new: true },
+      { name: "Supplier Scorecard", path: "/reports/supplier-scorecard", new: true },
+      { name: "Buyer Analysis", path: "/reports/buyer-analysis", new: true },
+      { name: "Style P&L", path: "/reports/style-pnl", new: true },
     ],
   },
   {
     icon: <PlugInIcon />,
-    name: "Authentication",
+    name: "System Admin",
     subItems: [
-      { name: "Sign In", path: "/signin", pro: false },
-      { name: "Sign Up", path: "/signup", pro: false },
+      { name: "Settings", path: "/settings" },
+      { name: "Approval Workflows", path: "/settings/approvals", new: true },
+      { name: "Notifications", path: "/settings/notifications", new: true },
+      { name: "Role Builder", path: "/settings/roles", new: true },
+      { name: "Excel Import", path: "/settings/excel-import", new: true },
     ],
   },
 ];
@@ -288,10 +395,10 @@ const AppSidebar: React.FC = () => {
       className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
-            ? "w-[290px]"
+            ? "w-72.5"
             : isHovered
-            ? "w-[290px]"
-            : "w-[90px]"
+            ? "w-72.5"
+            : "w-22.5"
         }
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
@@ -305,29 +412,13 @@ const AppSidebar: React.FC = () => {
       >
         <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <img
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
+            <span className="text-xl font-bold text-brand-500 dark:text-brand-400">
+              ERP TRACK
+            </span>
           ) : (
-            <img
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
+            <span className="text-xl font-bold text-brand-500 dark:text-brand-400">
+              ET
+            </span>
           )}
         </Link>
       </div>
@@ -336,7 +427,7 @@ const AppSidebar: React.FC = () => {
           <div className="flex flex-col gap-4">
             <div>
               <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+                className={`mb-4 text-xs uppercase flex leading-5 text-gray-400 ${
                   !isExpanded && !isHovered
                     ? "lg:justify-center"
                     : "justify-start"
@@ -352,7 +443,7 @@ const AppSidebar: React.FC = () => {
             </div>
             <div className="">
               <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+                className={`mb-4 text-xs uppercase flex leading-5 text-gray-400 ${
                   !isExpanded && !isHovered
                     ? "lg:justify-center"
                     : "justify-start"
@@ -368,7 +459,6 @@ const AppSidebar: React.FC = () => {
             </div>
           </div>
         </nav>
-        {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
       </div>
     </aside>
   );

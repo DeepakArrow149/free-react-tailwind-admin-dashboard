@@ -1,20 +1,29 @@
-import { HelmetProvider, Helmet } from "react-helmet-async";
+/**
+ * PageMeta Component
+ * Sets page title and meta description via react-helmet-async.
+ */
 
-const PageMeta = ({
-  title,
-  description,
-}: {
+import { Helmet, HelmetProvider } from 'react-helmet-async';
+import { appConfig } from '@/core/config';
+
+export interface PageMetaProps {
   title: string;
-  description: string;
-}) => (
-  <Helmet>
-    <title>{title}</title>
-    <meta name="description" content={description} />
-  </Helmet>
-);
+  description?: string;
+}
 
-export const AppWrapper = ({ children }: { children: React.ReactNode }) => (
-  <HelmetProvider>{children}</HelmetProvider>
-);
+export function PageMeta({ title, description }: PageMetaProps) {
+  const fullTitle = `${title} | ${appConfig.app.title}`;
+  return (
+    <Helmet>
+      <title>{fullTitle}</title>
+      {description && <meta name="description" content={description} />}
+    </Helmet>
+  );
+}
 
-export default PageMeta;
+/**
+ * App-level Helmet provider wrapper
+ */
+export function AppMetaProvider({ children }: { children: React.ReactNode }) {
+  return <HelmetProvider>{children}</HelmetProvider>;
+}

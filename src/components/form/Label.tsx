@@ -1,27 +1,27 @@
-import { FC, ReactNode } from "react";
-import { twMerge } from "tailwind-merge";
-import { clsx } from "clsx";
+/**
+ * Label Component
+ * Form field label with required indicator support.
+ */
 
-interface LabelProps {
-  htmlFor?: string;
+import type { LabelHTMLAttributes, ReactNode } from 'react';
+import { cn } from '@/core/utils';
+
+export interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
   children: ReactNode;
-  className?: string;
+  required?: boolean;
 }
 
-const Label: FC<LabelProps> = ({ htmlFor, children, className }) => {
+export function Label({ children, required, className, ...props }: LabelProps) {
   return (
     <label
-      htmlFor={htmlFor}
-      className={clsx(
-        twMerge(
-          "mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400",
-          className,
-        ),
+      className={cn(
+        'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300',
+        className
       )}
+      {...props}
     >
       {children}
+      {required && <span className="ml-0.5 text-error-500">*</span>}
     </label>
   );
-};
-
-export default Label;
+}

@@ -45,7 +45,7 @@ export default function OrderForm() {
   const isEdit = id && id !== "new";
   const navigate = useNavigate();
 
-  // â”€â”€ State â”€â”€
+  // ── State ──
   const [activeTab, setActiveTab] = useState<"details" | "poMatrix" | "fabricConsumption" | "processSequence" | "shipments" | "history">("details");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -83,7 +83,7 @@ export default function OrderForm() {
   // Original order (for edit/view)
   const [order, setOrder] = useState<BuyerOrderFull | null>(null);
 
-  // â”€â”€ Load lookups â”€â”€
+  // ── Load lookups ──
   useEffect(() => {
     Promise.all([
       masterApi.listBuyers({ limit: 100 }),
@@ -108,7 +108,7 @@ export default function OrderForm() {
     });
   }, []);
 
-  // â”€â”€ Load existing order â”€â”€
+  // ── Load existing order ──
   useEffect(() => {
     if (!isEdit) return;
     setLoading(true);
@@ -149,7 +149,7 @@ export default function OrderForm() {
       .finally(() => setLoading(false));
   }, [id, isEdit, navigate]);
 
-  // â”€â”€ Handlers â”€â”€
+  // ── Handlers ──
   const handleChange = (field: string, value: string | number) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (field === "buyerId") {
@@ -165,7 +165,7 @@ export default function OrderForm() {
     }
   };
 
-  // â”€â”€ Submit (header-only; PO Lines + Matrix are managed in the PO Matrix tab) â”€â”€
+  // ── Submit (header-only; PO Lines + Matrix are managed in the PO Matrix tab) ──
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
@@ -226,7 +226,7 @@ export default function OrderForm() {
     }
   };
 
-  // â”€â”€ Status transition â”€â”€
+  // ── Status transition ──
   const handleStatusChange = async (newStatus: string) => {
     if (!order) return;
     const remarks = newStatus === "CANCELLED" ? prompt("Cancellation reason:") : undefined;
@@ -277,7 +277,7 @@ export default function OrderForm() {
                     </p>
                   )}
                   <p className="text-sm text-gray-500">
-                    Rev. {order.revisionNo} Â· Created {new Date(order.createdAt).toLocaleDateString()}
+                    Rev. {order.revisionNo} · Created {new Date(order.createdAt).toLocaleDateString()}
                   </p>
                 </div>
               )}
@@ -348,7 +348,7 @@ export default function OrderForm() {
             ))}
           </div>
 
-          {/* â”€â”€ Details Tab â”€â”€ */}
+          {/* ── Details Tab ── */}
           {activeTab === "details" && (
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -365,7 +365,7 @@ export default function OrderForm() {
                   >
                     <option value={0}>Select Buyer</option>
                     {buyers.map((b) => (
-                      <option key={b.id} value={b.id}>{b.code} â€” {b.name}</option>
+                      <option key={b.id} value={b.id}>{b.code} — {b.name}</option>
                     ))}
                   </select>
                 </div>
@@ -385,7 +385,7 @@ export default function OrderForm() {
                     {styles
                       .filter((s) => !form.buyerId || s.buyerId === form.buyerId)
                       .map((s) => (
-                        <option key={s.id} value={s.id}>{s.styleNo} â€” {s.styleName}</option>
+                        <option key={s.id} value={s.id}>{s.styleNo} — {s.styleName}</option>
                       ))
                     }
                   </select>
@@ -404,7 +404,7 @@ export default function OrderForm() {
                   >
                     <option value={0}>Select Season</option>
                     {seasons.map((s) => (
-                      <option key={s.id} value={s.id}>{s.code} â€” {s.name}</option>
+                      <option key={s.id} value={s.id}>{s.code} — {s.name}</option>
                     ))}
                   </select>
                 </div>
@@ -457,7 +457,7 @@ export default function OrderForm() {
                   >
                     <option value={0}>Select Company</option>
                     {companies.map((c) => (
-                      <option key={c.id} value={c.id}>{c.code} â€” {c.name}</option>
+                      <option key={c.id} value={c.id}>{c.code} — {c.name}</option>
                     ))}
                   </select>
                 </div>
@@ -475,7 +475,7 @@ export default function OrderForm() {
                   >
                     <option value={0}>Select Buying Agent</option>
                     {buyingAgents.map((a) => (
-                      <option key={a.id} value={a.id}>{a.code} â€” {a.name}</option>
+                      <option key={a.id} value={a.id}>{a.code} — {a.name}</option>
                     ))}
                   </select>
                 </div>
@@ -511,7 +511,7 @@ export default function OrderForm() {
                   >
                     <option value={0}>Select Party Group</option>
                     {partyGroups.map((p) => (
-                      <option key={p.id} value={p.id}>{p.code} â€” {p.name}</option>
+                      <option key={p.id} value={p.id}>{p.code} — {p.name}</option>
                     ))}
                   </select>
                 </div>
@@ -529,7 +529,7 @@ export default function OrderForm() {
                   >
                     <option value={0}>Select Thread Quality</option>
                     {threadQualities.map((t) => (
-                      <option key={t.id} value={t.id}>{t.code} â€” {t.name}</option>
+                      <option key={t.id} value={t.id}>{t.code} — {t.name}</option>
                     ))}
                   </select>
                 </div>
@@ -644,7 +644,7 @@ export default function OrderForm() {
                   />
                 </div>
 
-                {/* â”€â”€ References & LC Section â”€â”€ */}
+                {/* ── References & LC Section ── */}
                 <div className="sm:col-span-2 lg:col-span-3 mt-2">
                   <h4 className="text-sm font-semibold text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-1">
                     References &amp; LC
@@ -710,7 +710,7 @@ export default function OrderForm() {
                   />
                 </div>
 
-                {/* â”€â”€ Delivery Section â”€â”€ */}
+                {/* ── Delivery Section ── */}
                 <div className="sm:col-span-2 lg:col-span-3 mt-2">
                   <h4 className="text-sm font-semibold text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-1">
                     Delivery
@@ -732,7 +732,7 @@ export default function OrderForm() {
                     {branches
                       .filter((b) => !form.companyId || b.companyId === form.companyId)
                       .map((b) => (
-                        <option key={b.id} value={b.id}>{b.code} â€” {b.name}</option>
+                        <option key={b.id} value={b.id}>{b.code} — {b.name}</option>
                       ))}
                   </select>
                 </div>
@@ -790,27 +790,27 @@ export default function OrderForm() {
             </form>
           )}
 
-          {/* â”€â”€ PO Matrix Tab (new Excel-style entry) â”€â”€ */}
+          {/* ── PO Matrix Tab (new Excel-style entry) ── */}
           {activeTab === "poMatrix" && (
             <POMatrixSection orderId={order?.id ?? null} orderStatus={order?.status} />
           )}
 
-          {/* â”€â”€ Fabric Consumption Tab (engineering) â”€â”€ */}
+          {/* ── Fabric Consumption Tab (engineering) ── */}
           {activeTab === "fabricConsumption" && (
             <FabricConsumptionSection orderId={order?.id ?? null} orderStatus={order?.status} />
           )}
 
-          {/* â”€â”€ Process Sequence Tab (engineering process flow) â”€â”€ */}
+          {/* ── Process Sequence Tab (engineering process flow) ── */}
           {activeTab === "processSequence" && (
             <ProcessSequenceSection orderId={order?.id ?? null} orderStatus={order?.status} />
           )}
 
-          {/* â”€â”€ Shipments Tab â”€â”€ */}
+          {/* ── Shipments Tab ── */}
           {activeTab === "shipments" && order && (
             <ShipmentSchedulePanel orderId={order.id} readOnly={!!isReadOnly} />
           )}
 
-          {/* â”€â”€ Revision History Tab â”€â”€ */}
+          {/* ── Revision History Tab ── */}
           {activeTab === "history" && order && (
             <div>
               {order.revisions.length === 0 ? (

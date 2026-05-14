@@ -56,11 +56,14 @@ export function usePresence(scope: PresenceScope, id: string | undefined): UsePr
       setSessionId(null);
       return;
     }
-    const token = tokenService.getAccessToken();
-    if (!token) return;
+    const initialToken = tokenService.getAccessToken();
+    if (!initialToken) return;
 
     // EventSource can't set custom headers — auth flows via ?token=.
-    const url = `${env.API_BASE_URL}/presence/${scope}/${encodeURIComponent(id)}/stream?token=${encodeURIComponent(token)}`;
+    // SSE captures the token at connect time; if it later refreshes, the SSE
+    // will reconnect (TTL eviction → fresh session id). The heartbeat below
+    // reads the *current* token on every tick so it survives refresh.
+    const url = `${env.API_BASE_URL}/presence/${scope}/${encodeURIComponent(id)}/stream?token=${encodeURIComponent(initialToken)}`;
     const es = new EventSource(url);
 
     let mySessionId: string | null = null;
@@ -68,12 +71,16 @@ export function usePresence(scope: PresenceScope, id: string | undefined): UsePr
 
     const ping = async () => {
       if (!mySessionId) return;
+      // Re-read the token per tick so a background refresh by the axios
+      // interceptor takes effect without remounting the hook.
+      const currentToken = tokenService.getAccessToken();
+      if (!currentToken) return;
       try {
         await fetch(`${env.API_BASE_URL}/presence/${scope}/${encodeURIComponent(id)}/heartbeat`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${currentToken}`,
           },
           body: JSON.stringify({ sessionId: mySessionId }),
           keepalive: true,
@@ -116,18 +123,21 @@ export function usePresence(scope: PresenceScope, id: string | undefined): UsePr
       if (mySessionId) {
         const body = JSON.stringify({ sessionId: mySessionId });
         const leaveUrl = `${env.API_BASE_URL}/presence/${scope}/${encodeURIComponent(id)}/leave`;
+        const leaveToken = tokenService.getAccessToken();
         // sendBeacon doesn't carry auth headers; fall back to fetch+keepalive.
-        try {
-          fetch(leaveUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body,
-            keepalive: true,
-          }).catch(() => { /* swallow */ });
-        } catch { /* swallow */ }
+        if (leaveToken) {
+          try {
+            fetch(leaveUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${leaveToken}`,
+              },
+              body,
+              keepalive: true,
+            }).catch(() => { /* swallow */ });
+          } catch { /* swallow */ }
+        }
       }
 
       es.close();

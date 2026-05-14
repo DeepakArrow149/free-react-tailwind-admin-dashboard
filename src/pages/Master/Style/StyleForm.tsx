@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router";
 import { masterApi, type Category, type Season, type StyleMaster } from "../../../api/master";
 import PageMeta from "../../../components/common/PageMeta";
@@ -6,6 +6,7 @@ import Label from "../../../components/form/Label";
 import Input from "../../../components/form/input/InputField";
 import Button from "../../../components/ui/button/Button";
 import OperationBreakdownTab from "./OperationBreakdownTab";
+import { uploadUrl } from "@/core/utils";
 
 interface BuyerOption {
   id: number;
@@ -41,6 +42,45 @@ export default function StyleForm() {
   const [styleData, setStyleData] = useState<StyleMaster | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const images: string[] = Array.isArray(styleData?.images) ? styleData!.images! : [];
+
+  const handleImageUpload = async (file: File) => {
+    if (!isEdit || !id) {
+      setError("Save the style first, then add images.");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      setError("Only image files (JPEG, PNG, WebP) are accepted.");
+      return;
+    }
+    setUploadingImage(true);
+    setError("");
+    try {
+      const resp = await masterApi.uploadStyleImage(Number(id), file);
+      setStyleData(resp.data.data);
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setError(axiosErr?.response?.data?.message || "Image upload failed");
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleImageDelete = async (index: number) => {
+    if (!isEdit || !id) return;
+    if (!window.confirm("Remove this image?")) return;
+    try {
+      const resp = await masterApi.deleteStyleImage(Number(id), index);
+      setStyleData(resp.data.data);
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setError(axiosErr?.response?.data?.message || "Image delete failed");
+    }
+  };
 
   // Load lookups (independent calls so one failure doesn't block others)
   useEffect(() => {
@@ -285,6 +325,51 @@ export default function StyleForm() {
                   value={form.description}
                   onChange={(e) => handleChange("description", e.target.value)}
                 />
+              </div>
+
+              {/* Style Images */}
+              <div className="sm:col-span-2 lg:col-span-3">
+                <Label>Style Images {!isEdit && <span className="text-xs font-normal text-gray-400">(available after saving)</span>}</Label>
+                <div className="mt-1 flex flex-wrap gap-3">
+                  {images.map((url, idx) => (
+                    <div key={`${url}-${idx}`} className="group relative h-24 w-24 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                      <img src={uploadUrl(url)} alt={`Style image ${idx + 1}`} className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleImageDelete(idx)}
+                        aria-label="Remove image"
+                        className="absolute top-1 right-1 hidden h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow group-hover:flex hover:bg-red-600"
+                      >×</button>
+                      {idx === 0 && (
+                        <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">Primary</span>
+                      )}
+                    </div>
+                  ))}
+                  {isEdit && (
+                    <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-xs text-gray-500 hover:border-brand-500 hover:text-brand-600 dark:border-gray-700">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={uploadingImage}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) void handleImageUpload(f);
+                        }}
+                      />
+                      {uploadingImage ? (
+                        <span>Uploading…</span>
+                      ) : (
+                        <>
+                          <svg className="mb-1 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" /></svg>
+                          <span>Add image</span>
+                        </>
+                      )}
+                    </label>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-gray-400">JPEG / PNG / WebP, up to 5 MB. The first image is the primary thumbnail shown on orders.</p>
               </div>
             </div>
 

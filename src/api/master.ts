@@ -72,6 +72,9 @@ export interface StyleMaster {
   productionType?: string | null;
   totalSam?: number;
   totalOperations?: number;
+  /** Relative URLs (e.g. /uploads/style_xxx.jpg). First entry is the primary thumbnail. */
+  images?: string[] | null;
+  techPackUrl?: string | null;
   buyer?: { id: number; name: string; code: string };
   season?: { id: number; name: string; code: string } | null;
   category?: { id: number; name: string } | null;
@@ -243,6 +246,19 @@ export const masterApi = {
   createStyle: (data: Partial<StyleMaster>) => api.post<SingleResponse<StyleMaster>>('/master/styles', data),
   updateStyle: (id: number, data: Partial<StyleMaster>) => api.patch<SingleResponse<StyleMaster>>(`/master/styles/${id}`, data),
   deleteStyle: (id: number) => api.delete(`/master/styles/${id}`),
+
+  // Style Images (gallery upload)
+  uploadStyleImage: (styleId: number, file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return api.post<SingleResponse<StyleMaster>>(
+      `/master/styles/${styleId}/images`,
+      form,
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    );
+  },
+  deleteStyleImage: (styleId: number, index: number) =>
+    api.delete<SingleResponse<StyleMaster>>(`/master/styles/${styleId}/images/${index}`),
 
   // Style Operations (OB Breakdown)
   getStyleOperations: (styleId: number) => api.get<SingleResponse<StyleOperation[]>>(`/master/styles/${styleId}/operations`),

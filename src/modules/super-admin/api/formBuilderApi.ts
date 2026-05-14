@@ -398,6 +398,10 @@ export interface FormTemplate {
   isSystem: boolean;
   createdBy: string;
   createdAt: string;
+  /** Module the template belongs to (master, merchandising, costing, …). */
+  targetModule?: string | null;
+  /** Binding metadata projected from snapshot.binding — null for unbound (process) templates. */
+  binding?: { mode?: string; model?: string; table?: string } | null;
 }
 
 export async function fetchTemplates(): Promise<FormTemplate[]> {

@@ -11,7 +11,7 @@ import { Pagination } from "../../../components/table";
 import TableSkeleton from '@/components/common/TableSkeleton';
 import ExportButton from '@/components/common/ExportButton';
 import { excelExportApi } from '../../../api/export';
-import { formatDateShort as formatDate, formatCurrency } from '@/core/utils';
+import { formatDateShort as formatDate, formatCurrency, uploadUrl } from '@/core/utils';
 import NewOrderQuickStartModal from './components/NewOrderQuickStartModal';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -150,7 +150,23 @@ export default function OrderList() {
                       <span className="text-xs text-gray-400">{o.buyer.code}</span>{" "}
                       {o.buyer.name}
                     </td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{o.style.styleNo}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
+                      <div className="flex items-center gap-2">
+                        {o.style.images?.[0] ? (
+                          <img
+                            src={uploadUrl(o.style.images[0])}
+                            alt={o.style.styleName}
+                            className="h-8 w-8 shrink-0 rounded object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-gray-100 text-gray-300 dark:bg-gray-800 dark:text-gray-600" aria-label="No image">
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4-4a2 2 0 012.8 0L14 14m-2-2l2-2a2 2 0 012.8 0L20 12M4 6h16v12H4V6z" /></svg>
+                          </div>
+                        )}
+                        <span>{o.style.styleNo}</span>
+                      </div>
+                    </td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(o.orderDate)}</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(o.exFactoryDate)}</td>
                     <td className="px-4 py-3 text-right font-medium text-gray-800 dark:text-white/90">

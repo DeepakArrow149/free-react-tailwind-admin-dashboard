@@ -5,6 +5,25 @@
 
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { tokenService } from '@/core/services/tokenService';
+
+/**
+ * Build an `<img src>` URL for an authenticated upload path like `/uploads/x.jpg`.
+ *
+ * The /uploads route is JWT-protected but `<img>` can't send Authorization
+ * headers, so we append the current access token as a query param — the
+ * authenticate middleware accepts `?token=` as a fallback for GETs.
+ *
+ * Returns undefined for falsy inputs so callers can do `<img src={uploadUrl(x)}/>`.
+ */
+export function uploadUrl(relativePath: string | null | undefined): string | undefined {
+  if (!relativePath) return undefined;
+  if (/^https?:\/\//i.test(relativePath)) return relativePath;
+  const token = tokenService.getAccessToken();
+  if (!token) return relativePath;
+  const sep = relativePath.includes('?') ? '&' : '?';
+  return `${relativePath}${sep}token=${encodeURIComponent(token)}`;
+}
 
 /**
  * Merge Tailwind CSS classes with conflict resolution.

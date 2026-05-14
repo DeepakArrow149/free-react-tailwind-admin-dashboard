@@ -34,7 +34,7 @@ export interface BuyerOrderSummary {
   referenceNo: string | null;
   createdAt: string;
   buyer: { id: number; name: string; code: string };
-  style: { id: number; styleNo: string; styleName: string };
+  style: { id: number; styleNo: string; styleName: string; images?: string[] | null };
   season: { id: number; name: string; code: string } | null;
   company: { id: number; name: string; code: string } | null;
   buyingAgent: { id: number; name: string; code: string } | null;
@@ -126,6 +126,7 @@ export interface CreateBuyerOrderInput {
   buyerPoDate?: string | null;
   orderDate: string;
   exFactoryDate: string;
+  orderType?: 'CONFIRMED' | 'PROJECT' | 'SAMPLE' | 'CMT' | 'FOB';
   shipMode?: string;
   destinationPort?: string | null;
   incoterm?: string;

@@ -32,7 +32,7 @@ interface ApiErr {
 
 const errMsg = (e: ApiErr) => e?.response?.data?.message || e?.message || 'Request failed';
 
-// â”€â”€â”€â”€â”€ Query Keys â”€â”€â”€â”€â”€
+// ───── Query Keys ─────
 type QParam = Record<string, string | number | boolean> | undefined;
 
 const KEYS = {

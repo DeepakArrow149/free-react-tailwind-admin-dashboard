@@ -769,13 +769,16 @@ export default function FormBuilderPage() {
               </div>
             ) : (
               <div className="flex h-full flex-col">
-                {/* Sidebar tabs */}
-                <div
-                  className="flex items-center justify-between gap-1 border-b border-gray-200 px-2 py-1.5 dark:border-gray-700"
-                  role="tablist"
-                  aria-label="Sidebar panels"
-                >
-                  <div className="flex flex-1 gap-0.5 overflow-x-auto">
+                {/* Sidebar tabs — the tablist role lives on the inner div that
+                    contains only role="tab" children. The outer div also holds
+                    the Collapse button which is an action, not a tab, so it
+                    can't be inside the tablist (aria-required-children). */}
+                <div className="flex items-center justify-between gap-1 border-b border-gray-200 px-2 py-1.5 dark:border-gray-700">
+                  <div
+                    className="flex flex-1 gap-0.5 overflow-x-auto"
+                    role="tablist"
+                    aria-label="Sidebar panels"
+                  >
                     {(['palette', 'properties', 'settings', 'actions', 'globalFields', 'notes'] as const).map((tab) => {
                       const labels = {
                         palette: { icon: '🧩', label: 'Fields' },

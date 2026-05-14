@@ -179,7 +179,6 @@ export function Sidebar({
     <aside
       className={cn(
         'fixed top-0 left-0 z-50 flex h-screen flex-col border-r border-gray-200 bg-white px-5 text-gray-900 transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100 mt-16 lg:mt-0',
-        showFull ? `w-[${SIDEBAR.EXPANDED_WIDTH}px]` : `w-[${SIDEBAR.COLLAPSED_WIDTH}px]`,
         isMobileOpen ? 'translate-x-0' : '-translate-x-full',
         'lg:translate-x-0'
       )}
@@ -204,7 +203,7 @@ export function Sidebar({
       </div>
 
       {/* Navigation */}
-      <div className="flex flex-1 flex-col overflow-y-auto no-scrollbar">
+      <div className="flex flex-1 flex-col overflow-y-auto custom-scrollbar pb-6">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
             {menuConfig.map((section) => (

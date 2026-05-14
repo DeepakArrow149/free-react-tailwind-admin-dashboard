@@ -16,7 +16,7 @@ interface AuthLayoutProps {
 
 export function AuthLayout({
   brandImage = '/images/logo/auth-logo.svg',
-  tagline = 'Enterprise Admin Dashboard Template',
+  tagline = 'Apparel Manufacturing ERP System',
 }: AuthLayoutProps) {
   return (
     <div className="relative z-1 min-h-screen bg-white p-6 dark:bg-gray-900 sm:p-0">

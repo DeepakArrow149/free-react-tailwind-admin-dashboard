@@ -1,15 +1,16 @@
 /**
  * Header Component
- * Responsive header with sidebar toggle, search, theme toggle, and user menu.
+ * Responsive header with sidebar toggle, search, theme toggle, notifications, and user menu.
  */
 
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { useSidebar } from '../context/SidebarContext';
 import { ThemeToggle } from '@/theme';
 import { Dropdown, DropdownItem, Avatar } from '@/components/ui';
-import { SearchBar } from '@/components/table';
 import { SIDEBAR } from '@/core/constants';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import client from '@/api/client';
+import GlobalSearchModal from '@/components/search/GlobalSearchModal';
 
 interface HeaderProps {
   /** User display name */
@@ -33,6 +34,37 @@ export function Header({
 }: HeaderProps) {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const navigate = useNavigate();
+
+  // Fetch notification unread count
+  const fetchUnread = useCallback(async () => {
+    try {
+      const res = await client.get('/admin/notifications', { params: { limit: 1 } });
+      setUnreadCount(res.data.data?.unread ?? 0);
+    } catch {
+      // silently ignore — user may not have notification access
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 60_000); // poll every 60s
+    return () => clearInterval(interval);
+  }, [fetchUnread]);
+
+  // Global Cmd+K / Ctrl+K shortcut
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(o => !o);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
 
   const handleToggle = () => {
     if (window.innerWidth >= SIDEBAR.DESKTOP_BREAKPOINT) {
@@ -43,7 +75,7 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-99999 flex w-full border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 lg:border-b">
+    <header className="sticky top-0 z-50 flex w-full border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 lg:border-b">
       <div className="flex w-full flex-col items-center justify-between lg:flex-row lg:px-6">
         {/* Top bar */}
         <div className="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 dark:border-gray-800 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
@@ -72,21 +104,31 @@ export function Header({
 
           {/* Mobile menu button */}
           <button
+            type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 lg:hidden"
+            aria-label="Toggle mobile menu"
+            aria-expanded={mobileMenuOpen ? 'true' : 'false'}
           >
-            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="6" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="18" cy="12" r="1.5" />
             </svg>
           </button>
 
-          {/* Desktop search */}
+          {/* Desktop search — opens Cmd+K modal */}
           <div className="hidden lg:block">
-            <SearchBar
-              onChange={() => {}}
-              placeholder="Search or type command..."
-              className="xl:w-[430px]"
-            />
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="flex h-11 items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 text-sm text-gray-400 hover:border-gray-300 hover:bg-gray-100 transition-colors dark:border-gray-800 dark:bg-gray-800 dark:text-gray-500 dark:hover:border-gray-700 dark:hover:bg-gray-700 xl:w-107.5"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <span>Search...</span>
+              <kbd className="ml-auto rounded border border-gray-300 px-1.5 py-0.5 text-xs font-medium text-gray-500 dark:border-gray-600">
+                ⌘K
+              </kbd>
+            </button>
           </div>
         </div>
 
@@ -95,6 +137,31 @@ export function Header({
           className={`${mobileMenuOpen ? 'flex' : 'hidden'} w-full items-center justify-between gap-4 px-5 py-4 shadow-theme-md lg:flex lg:justify-end lg:px-0 lg:shadow-none`}
         >
           <div className="flex items-center gap-2">
+            {/* Notification bell */}
+            <button
+              onClick={() => navigate('/settings/notifications')}
+              className="relative flex h-10 w-10 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+              title="Notifications"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </button>
+            {/* Mobile search button */}
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 lg:hidden transition-colors"
+              title="Search"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
             <ThemeToggle />
             {actions}
           </div>
@@ -156,6 +223,7 @@ export function Header({
           </Dropdown>
         </div>
       </div>
+      <GlobalSearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   );
 }

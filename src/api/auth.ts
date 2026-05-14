@@ -1,16 +1,21 @@
 import api from './client';
 
 export interface LoginPayload {
-  username: string;
+  email: string;
   password: string;
 }
 
 export interface AuthUser {
   id: number;
-  username: string;
   email: string;
-  fullName: string;
+  name: string;
+  fullName?: string;
+  username?: string;
   role: string;
+  companyCode?: string;
+  isSuperAdmin?: boolean;
+  roleName?: string;
+  permissions?: Record<string, string[]> | { all?: boolean; readOnly?: boolean; modules?: string[] };
 }
 
 export interface LoginResponse {

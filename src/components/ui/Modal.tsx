@@ -71,7 +71,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-99999 flex items-center justify-center overflow-y-auto"
+      className="fixed inset-0 z-70 flex items-center justify-center overflow-y-auto p-4"
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -86,7 +86,7 @@ export function Modal({
       <div
         ref={modalRef}
         className={cn(
-          'relative w-full rounded-2xl bg-white shadow-theme-xl dark:bg-gray-900',
+          'relative w-full rounded-2xl bg-white shadow-theme-xl dark:bg-gray-900 max-h-[90vh] overflow-y-auto custom-scrollbar',
           sizeStyles[size],
           className
         )}

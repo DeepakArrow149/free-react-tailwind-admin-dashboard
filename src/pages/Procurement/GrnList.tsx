@@ -2,6 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import { grnApi, type GoodsReceiptNote } from "../../api/procurement";
 import { Link } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
+import { PaginatedTable } from "../../components/table";
+import TableSkeleton from '@/components/common/TableSkeleton';
+import { downloadPdf } from "../../utils/downloadPdf";
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
@@ -16,7 +19,7 @@ export default function GrnList() {
     setLoading(true);
     try {
       const resp = await grnApi.list({ status: statusFilter || undefined });
-      setGrns(resp.data || []);
+      setGrns(resp.data?.data || []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   }, [statusFilter]);
@@ -52,6 +55,9 @@ export default function GrnList() {
           </select>
         </div>
 
+        {loading ? <TableSkeleton rows={5} cols={7} /> : (
+        <PaginatedTable data={grns} pageSize={20}>
+          {(pageData) => (
         <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-900/50">
@@ -66,11 +72,9 @@ export default function GrnList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {loading ? (
-                <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
-              ) : grns.length === 0 ? (
+              {grns.length === 0 ? (
                 <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">No GRNs found</td></tr>
-              ) : grns.map((g) => (
+              ) : pageData.map((g) => (
                 <tr key={g.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
                   <td className="px-4 py-3 font-medium text-brand-600 dark:text-brand-400">{g.grnNo}</td>
                   <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{g.po?.poNo || "—"}</td>
@@ -83,15 +87,21 @@ export default function GrnList() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {g.status === "DRAFT" && (
-                      <button onClick={() => handleConfirm(g.id)} className="text-xs text-green-600 hover:underline font-medium">Confirm</button>
-                    )}
+                    <div className="flex items-center justify-end gap-2">
+                      <button onClick={() => downloadPdf('grn', g.id)} className="text-xs text-purple-600 hover:underline">PDF</button>
+                      {g.status === "DRAFT" && (
+                        <button onClick={() => handleConfirm(g.id)} className="text-xs text-green-600 hover:underline font-medium">Confirm</button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+          )}
+        </PaginatedTable>
+        )}
       </div>
     </>
   );

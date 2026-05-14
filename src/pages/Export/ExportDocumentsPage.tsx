@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import PageMeta from '../../components/common/PageMeta';
+import { PaginatedTable } from '../../components/table';
 import {
   shippingBillApi, ShippingBill,
   blApi, BillOfLading,
@@ -34,11 +35,11 @@ export default function ExportDocumentsPage() {
   const [lcs, setLcs] = useState<LetterOfCredit[]>([]);
   const [incentives, setIncentives] = useState<ExportIncentive[]>([]);
 
-  const loadSb = async () => { const r = await shippingBillApi.list(); setSbs(r.data.data.data); };
-  const loadBl = async () => { const r = await blApi.list(); setBls(r.data.data.data); };
-  const loadCoo = async () => { const r = await cooApi.list(); setCoos(r.data.data.data); };
-  const loadLc = async () => { const r = await lcApi.list(); setLcs(r.data.data.data); };
-  const loadInc = async () => { const r = await incentiveApi.list(); setIncentives(r.data.data.data); };
+  const loadSb = async () => { const r = await shippingBillApi.list(); setSbs(r.data.data || []); };
+  const loadBl = async () => { const r = await blApi.list(); setBls(r.data.data || []); };
+  const loadCoo = async () => { const r = await cooApi.list(); setCoos(r.data.data || []); };
+  const loadLc = async () => { const r = await lcApi.list(); setLcs(r.data.data || []); };
+  const loadInc = async () => { const r = await incentiveApi.list(); setIncentives(r.data.data || []); };
 
   useEffect(() => {
     if (tab === 'Shipping Bills') loadSb();
@@ -93,11 +94,13 @@ export default function ExportDocumentsPage() {
         {tab === 'Shipping Bills' && (
           <>
             <button onClick={createSb} className="mb-3 px-3 py-1.5 bg-blue-600 text-white rounded text-sm">+ New SB</button>
+            <PaginatedTable data={sbs} pageSize={20}>
+              {(pageData) => (
             <table className="w-full text-sm">
               <thead><tr className="border-b dark:border-gray-700 text-left text-gray-500">
                 <th className="pb-2">SB No</th><th className="pb-2">Order</th><th className="pb-2">Date</th><th className="pb-2">Port</th><th className="pb-2">Status</th><th className="pb-2">Actions</th>
               </tr></thead>
-              <tbody>{sbs.map(s => (
+              <tbody>{pageData.map(s => (
                 <tr key={s.id} className="border-b dark:border-gray-800">
                   <td className="py-2">{s.sbNo}</td><td>{s.order?.orderNo}</td><td>{s.sbDate?.split('T')[0]}</td>
                   <td className="text-xs">{s.portOfLoading}</td><td>{badge(s.status)}</td>
@@ -109,51 +112,63 @@ export default function ExportDocumentsPage() {
                 </tr>
               ))}</tbody>
             </table>
+              )}
+            </PaginatedTable>
           </>
         )}
 
         {tab === 'B/L' && (
           <>
             <button onClick={createBl} className="mb-3 px-3 py-1.5 bg-blue-600 text-white rounded text-sm">+ New B/L</button>
+            <PaginatedTable data={bls} pageSize={20}>
+              {(pageData) => (
             <table className="w-full text-sm">
               <thead><tr className="border-b dark:border-gray-700 text-left text-gray-500">
                 <th className="pb-2">BL No</th><th className="pb-2">Carrier</th><th className="pb-2">Vessel</th><th className="pb-2">ETD</th><th className="pb-2">ETA</th><th className="pb-2">Status</th>
               </tr></thead>
-              <tbody>{bls.map(b => (
+              <tbody>{pageData.map(b => (
                 <tr key={b.id} className="border-b dark:border-gray-800">
                   <td className="py-2">{b.blNo}</td><td>{b.carrierName ?? '-'}</td><td>{b.vesselName ?? '-'}</td>
                   <td>{b.etd?.split('T')[0] ?? '-'}</td><td>{b.eta?.split('T')[0] ?? '-'}</td><td>{badge(b.status)}</td>
                 </tr>
               ))}</tbody>
             </table>
+              )}
+            </PaginatedTable>
           </>
         )}
 
         {tab === 'COO' && (
           <>
             <button onClick={createCoo2} className="mb-3 px-3 py-1.5 bg-blue-600 text-white rounded text-sm">+ New COO</button>
+            <PaginatedTable data={coos} pageSize={20}>
+              {(pageData) => (
             <table className="w-full text-sm">
               <thead><tr className="border-b dark:border-gray-700 text-left text-gray-500">
                 <th className="pb-2">COO No</th><th className="pb-2">Order</th><th className="pb-2">Country</th><th className="pb-2">Scheme</th><th className="pb-2">Date</th>
               </tr></thead>
-              <tbody>{coos.map(c => (
+              <tbody>{pageData.map(c => (
                 <tr key={c.id} className="border-b dark:border-gray-800">
                   <td className="py-2">{c.cooNo}</td><td>{c.order?.orderNo}</td>
                   <td>{c.destinationCountry ?? '-'}</td><td>{c.preferentialScheme ?? '-'}</td><td>{c.issueDate?.split('T')[0] ?? '-'}</td>
                 </tr>
               ))}</tbody>
             </table>
+              )}
+            </PaginatedTable>
           </>
         )}
 
         {tab === 'LC' && (
           <>
             <button onClick={createLc2} className="mb-3 px-3 py-1.5 bg-blue-600 text-white rounded text-sm">+ New LC</button>
+            <PaginatedTable data={lcs} pageSize={20}>
+              {(pageData) => (
             <table className="w-full text-sm">
               <thead><tr className="border-b dark:border-gray-700 text-left text-gray-500">
                 <th className="pb-2">LC No</th><th className="pb-2">Order</th><th className="pb-2">Buyer</th><th className="pb-2">Bank</th><th className="pb-2">Amount</th><th className="pb-2">Expiry</th><th className="pb-2">Status</th>
               </tr></thead>
-              <tbody>{lcs.map(l => (
+              <tbody>{pageData.map(l => (
                 <tr key={l.id} className="border-b dark:border-gray-800">
                   <td className="py-2">{l.lcNo}</td><td>{l.order?.orderNo}</td><td>{l.buyer?.name}</td>
                   <td>{l.bankName ?? '-'}</td><td>{l.currency} {Number(l.lcAmount).toLocaleString()}</td>
@@ -161,17 +176,21 @@ export default function ExportDocumentsPage() {
                 </tr>
               ))}</tbody>
             </table>
+              )}
+            </PaginatedTable>
           </>
         )}
 
         {tab === 'Incentives' && (
           <>
             <button onClick={createInc} className="mb-3 px-3 py-1.5 bg-blue-600 text-white rounded text-sm">+ New Incentive</button>
+            <PaginatedTable data={incentives} pageSize={20}>
+              {(pageData) => (
             <table className="w-full text-sm">
               <thead><tr className="border-b dark:border-gray-700 text-left text-gray-500">
                 <th className="pb-2">Claim No</th><th className="pb-2">Order</th><th className="pb-2">Type</th><th className="pb-2">FOB</th><th className="pb-2">Rate%</th><th className="pb-2">Claim Amt</th><th className="pb-2">Status</th>
               </tr></thead>
-              <tbody>{incentives.map(i => (
+              <tbody>{pageData.map(i => (
                 <tr key={i.id} className="border-b dark:border-gray-800">
                   <td className="py-2">{i.claimNo}</td><td>{i.order?.orderNo}</td><td>{i.incentiveType}</td>
                   <td>{Number(i.fobValue).toLocaleString()}</td><td>{Number(i.ratePct ?? 0).toFixed(2)}%</td>
@@ -179,6 +198,8 @@ export default function ExportDocumentsPage() {
                 </tr>
               ))}</tbody>
             </table>
+              )}
+            </PaginatedTable>
           </>
         )}
       </div>

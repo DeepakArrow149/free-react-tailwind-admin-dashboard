@@ -12,29 +12,21 @@ import { Backdrop } from './components/Backdrop';
 import { SIDEBAR } from '@/core/constants';
 import { useAuthStore } from '@/store';
 import { tokenService } from '@/core/services';
-import { defaultMenuConfig } from './config/menuConfig';
-import { filterMenuByRole } from './config/menuTypes';
-import { useMemo } from 'react';
+import { useMenuConfig } from './hooks/useMenuConfig';
 
 function DashboardContent() {
-  const { isExpanded, isHovered } = useSidebar();
+  const { isExpanded, isHovered, isMobile } = useSidebar();
   const showFull = isExpanded || isHovered;
   const { user, clearAuth } = useAuthStore();
   const navigate = useNavigate();
 
-  // Filter menu based on user roles
-  const filteredMenu = useMemo(() => {
-    const userRoles = user?.roles ?? [];
-    if (user?.isSuperAdmin) {
-      return filterMenuByRole(defaultMenuConfig, [...userRoles, 'super_admin']);
-    }
-    return filterMenuByRole(defaultMenuConfig, userRoles);
-  }, [user]);
+  // Dynamic menu: merges static config + published form items, then filters by role
+  const { menuConfig: filteredMenu } = useMenuConfig();
 
   const handleSignOut = () => {
     tokenService.clearTokens();
     clearAuth();
-    navigate('/auth/signin');
+    navigate('/signin');
   };
 
   // Build display role — show company context for tenant users
@@ -43,7 +35,7 @@ function DashboardContent() {
     : [user?.companyName, user?.branchName].filter(Boolean).join(' · ') || user?.role || 'User';
 
   return (
-    <div className="min-h-screen xl:flex">
+    <div className="min-h-screen lg:flex">
       <div>
         <Sidebar menuConfig={filteredMenu} />
         <Backdrop />
@@ -51,7 +43,7 @@ function DashboardContent() {
       <div
         className="flex-1 transition-all duration-300 ease-in-out"
         style={{
-          marginLeft: showFull ? SIDEBAR.EXPANDED_WIDTH : SIDEBAR.COLLAPSED_WIDTH,
+          marginLeft: isMobile ? 0 : (showFull ? SIDEBAR.EXPANDED_WIDTH : SIDEBAR.COLLAPSED_WIDTH),
         }}
       >
         <Header
@@ -61,7 +53,7 @@ function DashboardContent() {
         />
         {/* Tenant context banner for company users */}
         {user?.companyName && !user.isSuperAdmin && (
-          <div className="border-b border-gray-200 bg-gray-50 px-6 py-2 dark:border-gray-800 dark:bg-white/[0.02]">
+          <div className="border-b border-gray-200 bg-gray-50 px-6 py-2 dark:border-gray-800 dark:bg-white/2">
             <div className="mx-auto flex max-w-screen-2xl items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
               <span>
                 <strong className="text-gray-700 dark:text-gray-300">{user.companyName}</strong>

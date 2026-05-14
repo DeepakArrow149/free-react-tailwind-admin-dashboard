@@ -1,6 +1,7 @@
 /**
  * Multi-Tenant Type Definitions
  */
+import type { CompanyStatus, UserStatus, SubscriptionPlan, SubscriptionStatus } from '@erp/shared-types';
 
 // ─── Company / Tenant ────────────────────────────────────────
 
@@ -9,7 +10,7 @@ export interface Company {
   companyCode: string;
   companyName: string;
   databaseName: string;
-  status: 'active' | 'suspended' | 'inactive' | 'deleted';
+  status: CompanyStatus;
   plan?: string;
   subscriptionStatus?: string;
   maxUsers?: number;
@@ -66,7 +67,7 @@ export interface TenantUser {
   email: string;
   name: string;
   avatar: string | null;
-  status: 'active' | 'inactive' | 'suspended';
+  status: UserStatus;
   role: string;
   roleDisplay: string;
   roleId: number | null;
@@ -100,8 +101,8 @@ export interface Role {
 export interface Subscription {
   id: number;
   companyId: number;
-  plan: 'free' | 'standard' | 'enterprise';
-  status: 'active' | 'expired' | 'cancelled';
+  plan: SubscriptionPlan;
+  status: SubscriptionStatus;
   maxUsers: number;
   maxBranches: number;
   startedAt: string;

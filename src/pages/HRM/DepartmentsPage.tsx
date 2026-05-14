@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { departmentApi, Department } from "../../api/hrm";
 import { toastSuccess, toastError } from "../../utils/toast";
 import PageMeta from "../../components/common/PageMeta";
+import { PaginatedTable } from "../../components/table";
 
 export default function DepartmentsPage() {
   const [rows, setRows] = useState<Department[]>([]);
@@ -48,12 +49,12 @@ export default function DepartmentsPage() {
               <div className="space-y-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Code</label>
-                  <input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })}
+                  <input aria-label="Department code" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })}
                     className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Name</label>
-                  <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  <input aria-label="Department name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
                     className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white" />
                 </div>
               </div>
@@ -69,6 +70,8 @@ export default function DepartmentsPage() {
         {loading ? (
           <p className="text-gray-400 py-8 text-center">Loading…</p>
         ) : (
+          <PaginatedTable data={rows} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700">
@@ -79,19 +82,21 @@ export default function DepartmentsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {rows.map((r) => (
+                {pageData.map((r) => (
                   <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{r.code}</td>
                     <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{r.name}</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{r._count?.employees ?? 0}</td>
                   </tr>
                 ))}
-                {rows.length === 0 && (
+                {pageData.length === 0 && (
                   <tr><td colSpan={3} className="px-4 py-8 text-center text-gray-400">No departments</td></tr>
                 )}
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
         )}
       </div>
     </>

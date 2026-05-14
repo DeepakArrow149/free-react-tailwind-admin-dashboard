@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import PageMeta from '../../components/common/PageMeta';
+import { Pagination } from '../../components/table';
 import { packingListApi, PackingList, PackingListDetail, CartonDetail } from '../../api/packing';
+import { downloadPdf } from '../../utils/downloadPdf';
 
 const statusBadge = (s: string) => {
   const map: Record<string, string> = {
@@ -41,8 +43,8 @@ export default function PackingListPage() {
 
   const load = async () => {
     const res = await packingListApi.list({ page, limit: 20 });
-    setItems(res.data.data.data);
-    setTotalPages(res.data.data.totalPages);
+    setItems(res.data.data || []);
+    setTotalPages(res.data.meta?.totalPages ?? 1);
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -94,9 +96,9 @@ export default function PackingListPage() {
         {showForm && (
           <div className="mb-6 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-4">
             <div className="grid grid-cols-3 gap-3">
-              <div><label className="block text-xs text-gray-500 mb-1">Order ID*</label><input type="number" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.orderId ?? ''} onChange={e => setForm({ ...form, orderId: +e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">Buyer ID*</label><input type="number" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.buyerId ?? ''} onChange={e => setForm({ ...form, buyerId: +e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">PL Date*</label><input type="date" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.plDate ?? ''} onChange={e => setForm({ ...form, plDate: e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Order ID*</label><input type="number" aria-label="Order ID" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.orderId ?? ''} onChange={e => setForm({ ...form, orderId: +e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Buyer ID*</label><input type="number" aria-label="Buyer ID" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.buyerId ?? ''} onChange={e => setForm({ ...form, buyerId: +e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">PL Date*</label><input type="date" aria-label="PL Date" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.plDate ?? ''} onChange={e => setForm({ ...form, plDate: e.target.value })} /></div>
             </div>
 
             {/* SKU Details */}
@@ -154,6 +156,7 @@ export default function PackingListPage() {
                   <td>{Number(i.totalCbm ?? 0).toFixed(4)}</td>
                   <td>{statusBadge(i.status)}</td>
                   <td className="space-x-1">
+                    <button onClick={() => downloadPdf('packing-list', i.id)} className="text-purple-600 hover:underline text-xs">PDF</button>
                     {i.status === 'DRAFT' && <>
                       <button onClick={() => handleConfirm(i.id)} className="text-blue-600 hover:underline text-xs">Confirm</button>
                       <button onClick={() => handleDelete(i.id)} className="text-red-600 hover:underline text-xs">Delete</button>
@@ -167,10 +170,13 @@ export default function PackingListPage() {
             </tbody>
           </table>
         </div>
-        <div className="flex justify-between items-center mt-3">
-          <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-700">Prev</button>
-          <span className="text-sm text-gray-500">Page {page}/{totalPages}</span>
-          <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-700">Next</button>
+        <div className="mt-3">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(p) => setPage(p)}
+            pageSize={20}
+          />
         </div>
       </div>
     </>

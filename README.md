@@ -1,197 +1,140 @@
-# TailAdmin React - Free React Tailwind Admin Dashboard Template
+# STITCH ERP — Web Client
 
-TailAdmin is a free and open-source admin dashboard template built on **React and Tailwind CSS**, providing developers
-with everything they need to create a comprehensive, data-driven back-end,
-dashboard, or admin panel solution for upcoming web projects.
+React-based single-page application for the STITCH ERP apparel manufacturing system.
 
-With TailAdmin, you get access to all the necessary dashboard UI components, elements, and pages required to build a
-feature-rich and complete dashboard or admin panel. Whether you're building dashboard or admin panel for a complex web
-application or a simple website, TailAdmin is the perfect solution to help you get up and running quickly.
+---
 
-![TailAdmin React.js Dashboard Preview](./banner.png)
+## Tech Stack
 
-## Overview
+| Technology     | Version | Purpose                        |
+| -------------- | ------- | ------------------------------ |
+| React          | 19      | UI framework                   |
+| TypeScript     | ~5.7    | Type safety                    |
+| Vite           | 6.1+    | Build tool & dev server        |
+| Tailwind CSS   | 4.0     | Utility-first styling          |
+| Zustand        | 5.0     | Global state management        |
+| React Router   | 7.1     | Client-side routing            |
+| Axios          | 1.7     | HTTP client                    |
+| React DnD      | 16      | Drag-and-drop (Form Builder)   |
+| ApexCharts     | 4.1     | Data visualization             |
+| FullCalendar   | 6.1     | Calendar views                 |
+| Sonner         | 2.0     | Toast notifications            |
 
-TailAdmin provides essential UI components and layouts for building feature-rich, data-driven admin dashboards and
-control panels. It's built on:
+---
 
-- React 19
-- TypeScript
-- Tailwind CSS v4
+## Prerequisites
 
-### Quick Links
+- **Node.js** >= 20.x
+- **npm** >= 10.x
+- Running API server at `http://localhost:4000` (see `apps/api-server/`)
 
-- [✨ Visit Website](https://tailadmin.com)
-- [📄 Documentation](https://tailadmin.com/docs)
-- [⬇️ Download](https://tailadmin.com/download)
-- [🖌️ Figma Design File (Community Edition)](https://www.figma.com/community/file/1214477970819985778)
-- [⚡ Get PRO Version](https://tailadmin.com/pricing)
+---
 
-### Demos
-
-- [Free Version](https://free-react-demo.tailadmin.com/)
-- [Pro Version](https://react-demo.tailadmin.com)
-
-### Other Versions
-
-- [HTML Version](https://github.com/TailAdmin/tailadmin-free-tailwind-dashboard-template)
-- [Next.js Version](https://github.com/TailAdmin/free-nextjs-admin-dashboard)
-- [Vue.js Version](https://github.com/TailAdmin/vue-tailwind-admin-dashboard)
-- [Angular Version](https://github.com/TailAdmin/free-angular-tailwind-dashboard)
-- [Laravel Version](https://github.com/TailAdmin/tailadmin-laravel)
-
-## Installation
-
-### Prerequisites
-
-To get started with TailAdmin, ensure you have the following prerequisites installed and set up:
-
-- Node.js 18.x or later (recommended to use Node.js 20.x or later)
-
-### Cloning the Repository
-
-Clone the repository using the following command:
+## Setup
 
 ```bash
-git clone https://github.com/TailAdmin/free-react-tailwind-admin-dashboard.git
+cd apps/web-client
+npm install
 ```
 
-> Windows Users: place the repository near the root of your drive if you face issues while cloning.
+### Environment Variables
 
-1. Install dependencies:
+Create `.env` in the `apps/web-client/` directory:
 
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+```env
+VITE_API_BASE_URL=http://localhost:4000/api
+```
 
-2. Start the development server:
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+---
 
-## Components
+## Development
 
-TailAdmin is a pre-designed starting point for building a web-based dashboard using React.js and Tailwind CSS. The
-template includes:
+```bash
+npm run dev          # Start Vite dev server with HMR (default: http://localhost:5173)
+```
 
-- Sophisticated and accessible sidebar
-- Data visualization components
-- Prebuilt profile management and 404 page
-- Tables and Charts(Line and Bar)
-- Authentication forms and input elements
-- Alerts, Dropdowns, Modals, Buttons and more
-- FAQ & Accordion, Testimonials, and Carousels
-- Can't forget Dark Mode 🕶️
+## Build
 
-All components are built with React and styled using Tailwind CSS for easy customization.
+```bash
+npm run build        # TypeScript check + Vite production build → dist/
+npm run preview      # Preview the production build locally
+```
 
-## Feature Comparison
+## Linting & Formatting
 
-### Free Version
+```bash
+npm run lint         # Run ESLint
+npm run lint:fix     # Auto-fix lint issues
+npm run format       # Prettier formatting
+npm run type-check   # TypeScript check without emitting
+```
 
-- 1 Unique Dashboard
-- 35+ dashboard components
-- 50+ UI elements
-- Basic Figma design files
-- Community support
+---
 
-### Pro Version
+## Project Structure
 
-- 7 Unique Dashboards: Analytics, Ecommerce, Marketing, CRM, SaaS, Stocks, Logistics (more coming soon)
-- 500+ dashboard components and UI elements
-- Complete Figma design file
-- Email support
+```
+src/
+├── api/              # Axios instance and API service functions
+├── app/              # App-level providers, error boundaries
+├── components/       # Shared UI components (Button, Modal, Table, etc.)
+├── contexts/         # React context providers
+├── core/             # Core utilities, constants
+├── hooks/            # Custom React hooks
+├── icons/            # SVG icon components
+├── layouts/          # Page layouts (Sidebar, Header, Main)
+├── modules/          # Feature modules (one per ERP domain)
+├── pages/            # Top-level route pages
+├── routes/           # Route definitions and guards
+├── services/         # Business logic services
+├── store/            # Zustand stores
+├── theme/            # Tailwind theme configuration
+├── types/            # TypeScript type definitions
+└── utils/            # Helper utilities
+```
 
-To learn more about pro version features and pricing, visit our [pricing page](https://tailadmin.com/pricing).
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 
-## Changelog
+---
 
-### Version 2.1.0 - [Dec 30, 2025]
+## ERP Modules
 
-- Resolved Date Picker positioning and input issues in Charts.
+The application includes 14 ERP modules organized under `src/modules/`:
 
-### Version 2.0.2 - [March 25, 2025]
+| Module          | Description                                    |
+| --------------- | ---------------------------------------------- |
+| Master Data     | Buyers, suppliers, materials, styles, colors   |
+| Merchandising   | Buyer orders, tech packs, samples              |
+| Costing         | BOM costing, CMT, overhead calculations        |
+| Planning        | Production planning, capacity, scheduling      |
+| Procurement     | Purchase orders, GRN, vendor management        |
+| Inventory       | Stock management, transfers, adjustments       |
+| Production      | Cut plans, sewing lines, finishing, tracking    |
+| Quality         | Inspections, defect tracking, audit reports     |
+| Packing         | Packing lists, carton management, barcoding    |
+| Export          | Shipping docs, LC management, invoicing        |
+| Finance         | Accounts, payments, cost tracking              |
+| HRM             | Employee records, attendance, payroll           |
+| MIS / Dashboard | KPIs, charts, real-time production metrics     |
+| System Admin    | Users, roles, permissions, form builder, AI    |
 
-- Upgraded to React 19
-- Included overrides for packages to prevent peer dependency errors.
-- Migrated from react-flatpickr to flatpickr package for React 19 support
+---
 
-### Version 2.0.1 - [February 27, 2025]
+## Authentication
 
-#### Update Overview
+- JWT-based authentication with role-based access control (RBAC)
+- Protected routes via `AuthGuard` component
+- Token refresh handled automatically via Axios interceptors
+- Multi-tenant company context resolved at login
 
-- Upgraded to Tailwind CSS v4 for better performance and efficiency.
-- Updated class usage to match the latest syntax and features.
-- Replaced deprecated class and optimized styles.
+---
 
-#### Next Steps
+## Deployment
 
-- Run npm install or yarn install to update dependencies.
-- Check for any style changes or compatibility issues.
-- Refer to the Tailwind CSS v4 [Migration Guide](https://tailwindcss.com/docs/upgrade-guide) on this release. if needed.
-- This update keeps the project up to date with the latest Tailwind improvements. 🚀
+For production deployment, the web client is built to static files and served via Nginx. See the root [docs/DEPLOYMENT.md](../../docs/DEPLOYMENT.md) for Docker and Nginx configuration details.
 
-### Version 2.0.0 - [February 2025]
-
-A major update with comprehensive redesign and modern React patterns implementation.
-
-#### Major Improvements
-
-- Complete UI redesign with modern React patterns
-- New features: collapsible sidebar, chat, and calendar
-- Improved performance and accessibility
-- Updated data visualization using ApexCharts
-
-#### Key Features
-
-- Redesigned dashboards (Ecommerce, Analytics, Marketing, CRM)
-- Enhanced navigation with React Router integration
-- Advanced tables with sorting and filtering
-- Calendar with drag-and-drop support
-- New UI components and improved existing ones
-
-#### Breaking Changes
-
-- Updated sidebar component API
-- Migrated charts to ApexCharts
-- Revised authentication system
-
-[Read more](https://tailadmin.com/docs/update-logs/react) on this release.
-
-### Version 1.3.7 - [June 20, 2024]
-
-#### Enhancements
-
-1. Remove Repetition of DefaultLayout in every Pages
-2. Add ClickOutside Component for reduce repeated functionality in Header Message, Notification and User Dropdowns.
-
-### Version 1.3.6 - [Jan 31, 2024]
-
-#### Enhancements
-
-1. Integrate flatpickr in [Date Picker/Form Elements]
-2. Change color after select an option [Select Element/Form Elements].
-3. Make it functional [Multiselect Dropdown/Form Elements].
-4. Make best value editable [Pricing Table One/Pricing Table].
-5. Rearrange Folder structure.
-
-### Version 1.2.0 - [Apr 28, 2023]
-
-- Add Typescript in TailAdmin React.
-
-### Version 1.0.0 - Initial Release - [Mar 13, 2023]
-
-- Initial release of TailAdmin React.
+---
 
 ## License
 
-TailAdmin React.js Free Version is released under the MIT License.
-
-## Support
-
-If you find this project helpful, please consider giving it a star on GitHub. Your support helps us continue developing
-and maintaining this template.
+Proprietary — All rights reserved.

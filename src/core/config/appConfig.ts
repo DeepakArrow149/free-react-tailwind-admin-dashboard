@@ -59,7 +59,7 @@ export const appConfig: AppConfig = {
   app: {
     title: env.APP_TITLE,
     version: env.APP_VERSION,
-    description: 'Enterprise Admin Dashboard Template',
+    description: 'Apparel Manufacturing ERP System',
   },
 
   api: {

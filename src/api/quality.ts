@@ -152,3 +152,11 @@ export const endlineApi = {
   dhuSummary: (orderId: number, from: string, to: string) => client.get(`/quality/endline/dhu/${orderId}`, { params: { from, to } }).then(r => r.data),
   topDefects: (orderId: number, from?: string, to?: string) => client.get(`/quality/endline/top-defects/${orderId}`, { params: { from, to } }).then(r => r.data),
 };
+
+// ── Quality Reports API ──
+export const qualityReportApi = {
+  defectPareto: (params?: Record<string, unknown>) => client.get('/quality/reports/defect-pareto', { params }),
+  fabricSummary: (params?: Record<string, unknown>) => client.get('/quality/reports/fabric-summary', { params }),
+  claimAnalysis: (params?: Record<string, unknown>) => client.get('/quality/reports/claim-analysis', { params }),
+  aqlSummary: (params?: Record<string, unknown>) => client.get('/quality/reports/aql-summary', { params }),
+};

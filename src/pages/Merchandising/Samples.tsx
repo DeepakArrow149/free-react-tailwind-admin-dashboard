@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { samplingApi } from "../../api/sampling";
 import PageMeta from "../../components/common/PageMeta";
+import { useSampleTypes } from '@/hooks/useMasterLookups';
 
 /* ── helpers ── */
 function fmtDate(iso?: string) {
@@ -11,7 +12,7 @@ function fmtDate(iso?: string) {
 const STATUSES = ["DRAFT", "SUBMITTED", "IN_PROGRESS", "APPROVED", "REJECTED"] as const;
 type Status = (typeof STATUSES)[number];
 
-const SAMPLE_TYPES = ["FIT", "SIZE_SET", "PRE_PRODUCTION", "TOP", "GOLD_SEAL", "SHIPMENT"] as const;
+const _SAMPLE_DEFAULTS = ["FIT", "SIZE_SET", "PRE_PRODUCTION", "TOP", "GOLD_SEAL", "SHIPMENT"] as const;
 
 const statusMeta: Record<Status, { label: string; bg: string; text: string; ring: string }> = {
   DRAFT:        { label: "Draft",       bg: "bg-gray-100  dark:bg-gray-700",   text: "text-gray-700 dark:text-gray-300", ring: "ring-gray-300 dark:ring-gray-600" },
@@ -29,6 +30,7 @@ const typeLabel: Record<string, string> = {
 type Sample = Record<string, any>;
 
 export default function Samples() {
+  const { data: SAMPLE_TYPES = [..._SAMPLE_DEFAULTS] } = useSampleTypes();
   const [samples, setSamples] = useState<Sample[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"board" | "timeline">("board");
@@ -70,7 +72,6 @@ export default function Samples() {
   const totalCount     = samples.length;
   const approvedCount  = samples.filter((s) => s.status === "APPROVED").length;
   const pendingCount   = samples.filter((s) => ["DRAFT", "SUBMITTED", "IN_PROGRESS"].includes(s.status)).length;
-  const _rejectedCount = samples.filter((s) => s.status === "REJECTED").length;
   const approvalRate   = totalCount ? Math.round((approvedCount / totalCount) * 100) : 0;
 
   /* ── kanban card ── */

@@ -7,15 +7,28 @@ function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type R = any;
+interface ScanPackSummary {
+  totalQty?: number;
+  packedQty?: number;
+  cartonCount?: number;
+}
+
+interface R {
+  id?: number;
+  barcode?: string;
+  skuCode?: string;
+  color?: string;
+  size?: string;
+  cartonNo?: string;
+  createdAt?: string;
+}
 
 export default function ScanPackPage() {
   const [barcode, setBarcode] = useState("");
   const [scannedItems, setScannedItems] = useState<R[]>([]);
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState("");
-  const [summary, setSummary] = useState<R | null>(null);
+  const [summary, setSummary] = useState<ScanPackSummary | null>(null);
 
   const fetchList = useCallback(async () => {
     if (!orderId) return;

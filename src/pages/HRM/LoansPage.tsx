@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { loanApi } from "../../api/hrm";
 import { toastSuccess, toastError } from "../../utils/toast";
 import PageMeta from "../../components/common/PageMeta";
+import { PaginatedTable } from "../../components/table";
 
 /* ── helpers ── */
 function fmtDate(iso?: string) {
@@ -138,6 +139,8 @@ export default function LoansPage() {
         {loading ? (
           <p className="text-gray-400 py-8 text-center">Loading…</p>
         ) : (
+          <PaginatedTable data={loans} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700">
@@ -148,7 +151,7 @@ export default function LoansPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {loans.map((l: Any) => {
+                {pageData.map((l: Any) => {
                   const meta = statusMeta[l.status] ?? statusMeta.PENDING;
                   const outstanding = (l.loanAmount ?? 0) - (l.paidAmount ?? 0);
                   return (
@@ -173,6 +176,8 @@ export default function LoansPage() {
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
         )}
       </div>
     </>

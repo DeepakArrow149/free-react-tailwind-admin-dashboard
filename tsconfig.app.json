@@ -15,10 +15,12 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Path aliases */
-    "baseUrl": ".",
+    /* Path aliases — `paths` resolves relative to tsconfig under
+       moduleResolution: "bundler", so `baseUrl` isn't needed (and is
+       deprecated in TS 7.0 anyway). */
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"],
+      "@erp/shared-types": ["../../packages/shared-types/src"]
     },
 
     /* Linting */

@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { fgTransferApi, type FgTransfer } from "../../api/production";
 import PageMeta from "../../components/common/PageMeta";
+import { Pagination } from "../../components/table";
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
@@ -192,15 +193,15 @@ export default function FgTransferPage() {
           </div>
         )}
 
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 pt-2">
-            <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
-              className="px-3 py-1 rounded border text-sm disabled:opacity-40 dark:border-gray-600 dark:text-gray-300">Prev</button>
-            <span className="text-sm text-gray-600 dark:text-gray-400">Page {page} of {totalPages}</span>
-            <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}
-              className="px-3 py-1 rounded border text-sm disabled:opacity-40 dark:border-gray-600 dark:text-gray-300">Next</button>
-          </div>
-        )}
+        <div className="mt-2 pt-2">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(p) => setPage(p)}
+            totalItems={total}
+            pageSize={20}
+          />
+        </div>
       </div>
     </>
   );

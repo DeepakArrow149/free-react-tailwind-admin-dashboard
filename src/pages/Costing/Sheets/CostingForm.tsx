@@ -40,6 +40,22 @@ const defaults: CreateCostingSheetInput = {
   currency: "USD",
   exchangeRate: 1,
   remarks: null,
+  // v2 header fields (optional, nullable)
+  revenuePerMc: null,
+  epm: null,
+  commercialFinancePct: null,
+  commercialFinanceAmount: null,
+  buyingCommissionPct: null,
+  buyingCommissionAmount: null,
+  cmAmount: null,
+  paymentTerm: null,
+  fobPrice: null,
+  colorCount: null,
+  plannedLine: null,
+  packSize: null,
+  seasonStart: null,
+  seasonEnd: null,
+  salesContractNumber: null,
 };
 
 export default function CostingForm() {
@@ -171,6 +187,8 @@ export default function CostingForm() {
                 <div>
                   <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Style *</label>
                   <select
+                    aria-label="Style"
+                    title="Style"
                     value={form.styleId}
                     onChange={(e) => setField("styleId", Number(e.target.value))}
                     className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:text-white/90"
@@ -182,6 +200,8 @@ export default function CostingForm() {
                 <div>
                   <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Order</label>
                   <select
+                    aria-label="Order"
+                    title="Order"
                     value={form.orderId ?? ""}
                     onChange={(e) => {
                       const oid = e.target.value ? Number(e.target.value) : null;
@@ -200,6 +220,8 @@ export default function CostingForm() {
                 <div>
                   <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Stage</label>
                   <select
+                    aria-label="Stage"
+                    title="Stage"
                     value={form.stage}
                     onChange={(e) => setField("stage", e.target.value)}
                     className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:text-white/90"
@@ -210,6 +232,8 @@ export default function CostingForm() {
                 <div>
                   <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Order Qty</label>
                   <input
+                    aria-label="Order Qty"
+                    title="Order Qty"
                     type="number"
                     min="0"
                     value={form.orderQty || ""}
@@ -218,6 +242,74 @@ export default function CostingForm() {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Production & Commercial Details (v2) */}
+            <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3">
+              <h3 className="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Production & Commercial Details</h3>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">No. of Colors</label>
+                  <input type="number" min="0" placeholder="9" value={form.colorCount ?? ""} onChange={(e) => setField("colorCount", e.target.value ? Number(e.target.value) : null)} className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm text-right dark:border-gray-700 dark:text-white/90" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Planned Line</label>
+                  <input type="number" min="0" placeholder="1" value={form.plannedLine ?? ""} onChange={(e) => setField("plannedLine", e.target.value ? Number(e.target.value) : null)} className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm text-right dark:border-gray-700 dark:text-white/90" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Pack Size (Pcs)</label>
+                  <input type="number" min="0" placeholder="1" value={form.packSize ?? ""} onChange={(e) => setField("packSize", e.target.value ? Number(e.target.value) : null)} className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm text-right dark:border-gray-700 dark:text-white/90" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Season Start</label>
+                  <input type="date" title="Season start" value={form.seasonStart ?? ""} onChange={(e) => setField("seasonStart", e.target.value || null)} className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:text-white/90" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Season End</label>
+                  <input type="date" title="Season end" value={form.seasonEnd ?? ""} onChange={(e) => setField("seasonEnd", e.target.value || null)} className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:text-white/90" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Payment Term</label>
+                  <input type="text" placeholder="LC 90 Days" value={form.paymentTerm ?? ""} onChange={(e) => setField("paymentTerm", e.target.value || null)} className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:text-white/90" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Sales Contract No</label>
+                  <input type="text" placeholder="SC-12345" value={form.salesContractNumber ?? ""} onChange={(e) => setField("salesContractNumber", e.target.value || null)} className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:text-white/90" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">FOB Price</label>
+                  <input type="number" step="0.01" min="0" placeholder="0" value={form.fobPrice ?? ""} onChange={(e) => setField("fobPrice", e.target.value ? Number(e.target.value) : null)} className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm text-right dark:border-gray-700 dark:text-white/90" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Revenue / MC</label>
+                  <input type="number" step="0.01" min="0" placeholder="0" value={form.revenuePerMc ?? ""} onChange={(e) => setField("revenuePerMc", e.target.value ? Number(e.target.value) : null)} className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm text-right dark:border-gray-700 dark:text-white/90" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">EPM</label>
+                  <input type="number" step="0.0001" min="0" placeholder="0" value={form.epm ?? ""} onChange={(e) => setField("epm", e.target.value ? Number(e.target.value) : null)} className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm text-right dark:border-gray-700 dark:text-white/90" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Commercial+Finance %</label>
+                  <input type="number" step="0.1" min="0" max="100" placeholder="3" value={form.commercialFinancePct ?? ""} onChange={(e) => setField("commercialFinancePct", e.target.value ? Number(e.target.value) : null)} className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm text-right dark:border-gray-700 dark:text-white/90" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Commercial+Finance Amt</label>
+                  <input type="number" step="0.01" min="0" placeholder="0" value={form.commercialFinanceAmount ?? ""} onChange={(e) => setField("commercialFinanceAmount", e.target.value ? Number(e.target.value) : null)} className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm text-right dark:border-gray-700 dark:text-white/90" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Buying Commission %</label>
+                  <input type="number" step="0.1" min="0" max="100" placeholder="0" value={form.buyingCommissionPct ?? ""} onChange={(e) => setField("buyingCommissionPct", e.target.value ? Number(e.target.value) : null)} className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm text-right dark:border-gray-700 dark:text-white/90" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Buying Commission Amt</label>
+                  <input type="number" step="0.01" min="0" placeholder="0" value={form.buyingCommissionAmount ?? ""} onChange={(e) => setField("buyingCommissionAmount", e.target.value ? Number(e.target.value) : null)} className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm text-right dark:border-gray-700 dark:text-white/90" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">CM Amount</label>
+                  <input type="number" step="0.01" min="0" placeholder="0" value={form.cmAmount ?? ""} onChange={(e) => setField("cmAmount", e.target.value ? Number(e.target.value) : null)} className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm text-right dark:border-gray-700 dark:text-white/90" />
+                </div>
+              </div>
+              <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">After saving, add per-line items (Fabric / Trim / Supplementary / Operational) from the detail view.</p>
             </div>
 
             {/* Cost Components */}
@@ -231,6 +323,8 @@ export default function CostingForm() {
                       <label className="text-xs font-medium text-gray-600 dark:text-gray-400">{f.label}</label>
                     </div>
                     <input
+                      aria-label={f.label}
+                      title={f.label}
                       type="number"
                       step="0.01"
                       min="0"
@@ -247,6 +341,8 @@ export default function CostingForm() {
                 <span className="text-lg">💰</span>
                 <div className="flex-1"><label className="text-xs font-medium text-gray-600 dark:text-gray-400">Commission %</label></div>
                 <input
+                  aria-label="Commission percent"
+                  title="Commission percent"
                   type="number"
                   step="0.1"
                   min="0"
@@ -262,6 +358,8 @@ export default function CostingForm() {
                 <span className="text-lg">🏷️</span>
                 <div className="flex-1"><label className="text-xs font-medium text-brand-700 dark:text-brand-400">Selling Price per Piece</label></div>
                 <input
+                  aria-label="Selling Price per Piece"
+                  title="Selling Price per Piece"
                   type="number"
                   step="0.01"
                   min="0"

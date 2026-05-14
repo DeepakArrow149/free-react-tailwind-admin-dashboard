@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { bankReconApi } from "../../api/finance";
 import { toastSuccess, toastError } from "../../utils/toast";
 import PageMeta from "../../components/common/PageMeta";
+import { PaginatedTable } from "../../components/table";
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
@@ -13,25 +14,50 @@ const statusColors: Record<string, string> = {
   MISMATCH: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type R = any;
+interface BankReconItem {
+  id: number;
+  date?: string;
+  description?: string;
+  bankAmount?: number;
+  bookAmount?: number;
+  isReconciled?: boolean;
+}
+
+interface BankStatementEntry {
+  date?: string;
+  description?: string;
+  debit?: number;
+  credit?: number;
+  balance?: number;
+}
+
+interface R {
+  id: number;
+  accountId?: number;
+  accountName?: string;
+  period?: string;
+  bankBalance?: number;
+  bookBalance?: number;
+  status: string;
+  items?: BankReconItem[];
+}
 
 export default function BankReconciliationPage() {
   const [reconciliations, setReconciliations] = useState<R[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [items, setItems] = useState<R[]>([]);
+  const [items, setItems] = useState<BankReconItem[]>([]);
   const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
 
   // Statement
   const [stmtAccount, setStmtAccount] = useState("");
   const [stmtFrom, setStmtFrom] = useState("");
   const [stmtTo, setStmtTo] = useState("");
-  const [stmtData, setStmtData] = useState<R[]>([]);
+  const [stmtData, setStmtData] = useState<BankStatementEntry[]>([]);
 
   const fetchRecons = useCallback(async () => {
     setLoading(true);
-    try { const resp = await bankReconApi.list(); setReconciliations(resp.data ?? resp ?? []); } catch { setReconciliations([]); }
+    try { const resp = await bankReconApi.list(); setReconciliations(resp.data ?? []); } catch { setReconciliations([]); }
     setLoading(false);
   }, []);
 
@@ -77,6 +103,8 @@ export default function BankReconciliationPage() {
         <div>
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Reconciliation Batches</h2>
           {loading ? <p className="text-gray-500 dark:text-gray-400">Loading…</p> : (
+            <PaginatedTable data={reconciliations} pageSize={20}>
+              {(pageData) => (
             <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
               <table className="min-w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-700">
@@ -87,7 +115,7 @@ export default function BankReconciliationPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {reconciliations.map((r: R) => (
+                  {pageData.map((r: R) => (
                     <tr key={r.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 ${selectedId === r.id ? "bg-blue-50 dark:bg-blue-900/20" : ""}`}>
                       <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{r.id}</td>
                       <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{r.accountName ?? r.accountId}</td>
@@ -109,6 +137,8 @@ export default function BankReconciliationPage() {
                 </tbody>
               </table>
             </div>
+              )}
+            </PaginatedTable>
           )}
         </div>
 
@@ -122,11 +152,13 @@ export default function BankReconciliationPage() {
                 Reconcile Selected ({selectedItemIds.length})
               </button>
             </div>
+            <PaginatedTable data={items} pageSize={20}>
+              {(pageData) => (
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-4 py-2 w-8"><input type="checkbox" onChange={e => setSelectedItemIds(e.target.checked ? items.map((i: R) => i.id) : [])} /></th>
+                    <th className="px-4 py-2 w-8"><input type="checkbox" aria-label="Select all items" onChange={e => setSelectedItemIds(e.target.checked ? items.map((i: BankReconItem) => i.id) : [])} /></th>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Date</th>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Description</th>
                     <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400">Bank Amt</th>
@@ -135,9 +167,9 @@ export default function BankReconciliationPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {items.map((item: R) => (
+                  {pageData.map((item: BankReconItem) => (
                     <tr key={item.id}>
-                      <td className="px-4 py-2"><input type="checkbox" checked={selectedItemIds.includes(item.id)} onChange={() => toggleItem(item.id)} /></td>
+                      <td className="px-4 py-2"><input type="checkbox" aria-label="Select reconciliation item" checked={selectedItemIds.includes(item.id)} onChange={() => toggleItem(item.id)} /></td>
                       <td className="px-4 py-2 text-gray-700 dark:text-gray-300">{item.date ? fmtDate(item.date) : "—"}</td>
                       <td className="px-4 py-2 text-gray-700 dark:text-gray-300">{item.description ?? "—"}</td>
                       <td className="px-4 py-2 text-right text-gray-700 dark:text-gray-300">{Number(item.bankAmount ?? 0).toLocaleString("en-IN")}</td>
@@ -153,6 +185,8 @@ export default function BankReconciliationPage() {
                 </tbody>
               </table>
             </div>
+              )}
+            </PaginatedTable>
           </div>
         )}
 
@@ -160,15 +194,17 @@ export default function BankReconciliationPage() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 space-y-3">
           <h3 className="font-semibold text-gray-800 dark:text-gray-200">Bank Statement</h3>
           <div className="flex flex-wrap gap-3 items-end">
-            <input placeholder="Account ID" value={stmtAccount} onChange={e => setStmtAccount(e.target.value)}
+            <input aria-label="Account ID" placeholder="Account ID" value={stmtAccount} onChange={e => setStmtAccount(e.target.value)}
               className="border rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white w-36" />
-            <input type="date" value={stmtFrom} onChange={e => setStmtFrom(e.target.value)}
+            <input type="date" aria-label="Statement from date" value={stmtFrom} onChange={e => setStmtFrom(e.target.value)}
               className="border rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-            <input type="date" value={stmtTo} onChange={e => setStmtTo(e.target.value)}
+            <input type="date" aria-label="Statement to date" value={stmtTo} onChange={e => setStmtTo(e.target.value)}
               className="border rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
             <button onClick={handleFetchStatement} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Fetch</button>
           </div>
           {stmtData.length > 0 && (
+            <PaginatedTable data={stmtData} pageSize={20}>
+              {(pageData) => (
             <div className="overflow-x-auto mt-3">
               <table className="min-w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-700">
@@ -179,7 +215,7 @@ export default function BankReconciliationPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {stmtData.map((s: R, i: number) => (
+                  {pageData.map((s: BankStatementEntry, i: number) => (
                     <tr key={i}>
                       <td className="px-4 py-2 text-gray-700 dark:text-gray-300">{s.date ? fmtDate(s.date) : "—"}</td>
                       <td className="px-4 py-2 text-gray-700 dark:text-gray-300">{s.description}</td>
@@ -191,6 +227,8 @@ export default function BankReconciliationPage() {
                 </tbody>
               </table>
             </div>
+              )}
+            </PaginatedTable>
           )}
         </div>
       </div>

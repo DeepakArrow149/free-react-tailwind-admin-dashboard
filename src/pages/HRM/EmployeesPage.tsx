@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { employeeApi, departmentApi, designationApi, Employee, Department, Designation } from "../../api/hrm";
+import { PaginatedTable } from "../../components/table";
 
 const statusColors: Record<string, string> = {
   ACTIVE: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
@@ -67,6 +68,7 @@ export default function EmployeesPage() {
                 <div key={f.key}>
                   <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{f.label}</label>
                   <input
+                    aria-label={f.label}
                     value={(form as Record<string, unknown>)[f.key] as string}
                     onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
                     className="w-full border rounded px-2 py-1 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -77,6 +79,7 @@ export default function EmployeesPage() {
               <div>
                 <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Department</label>
                 <select
+                  aria-label="Department"
                   value={form.departmentId}
                   onChange={(e) => setForm({ ...form, departmentId: e.target.value })}
                   className="w-full border rounded px-2 py-1 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -89,6 +92,7 @@ export default function EmployeesPage() {
               <div>
                 <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Designation</label>
                 <select
+                  aria-label="Designation"
                   value={form.designationId}
                   onChange={(e) => setForm({ ...form, designationId: e.target.value })}
                   className="w-full border rounded px-2 py-1 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -114,6 +118,7 @@ export default function EmployeesPage() {
                   <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{f.label}</label>
                   <input
                     type={f.type || "text"}
+                    aria-label={f.label}
                     value={(form as Record<string, unknown>)[f.key] as string}
                     onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
                     className="w-full border rounded px-2 py-1 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -138,6 +143,8 @@ export default function EmployeesPage() {
           </form>
         )}
 
+        <PaginatedTable data={employees} pageSize={20}>
+          {(pageData) => (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
@@ -148,7 +155,7 @@ export default function EmployeesPage() {
               </tr>
             </thead>
             <tbody className="divide-y dark:divide-gray-700">
-              {employees.map((emp) => (
+              {pageData.map((emp) => (
                 <tr key={emp.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                   <td className="px-3 py-2 font-mono">{emp.empCode}</td>
                   <td className="px-3 py-2">{emp.firstName} {emp.lastName}</td>
@@ -169,6 +176,8 @@ export default function EmployeesPage() {
             </tbody>
           </table>
         </div>
+          )}
+        </PaginatedTable>
       </div>
     </>
   );

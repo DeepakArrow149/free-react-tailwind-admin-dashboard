@@ -7,6 +7,10 @@ interface UsePaginationOptions {
   totalItems: number;
 }
 
+/**
+ * Generic client-side pagination hook.
+ * Use `paginateData(array)` to slice an array for the current page.
+ */
 export function usePagination({
   initialPage = PAGINATION.DEFAULT_PAGE,
   initialPageSize = PAGINATION.DEFAULT_PAGE_SIZE,
@@ -16,7 +20,7 @@ export function usePagination({
   const [pageSize, setPageSize] = useState(initialPageSize);
 
   const totalPages = useMemo(
-    () => Math.ceil(totalItems / pageSize),
+    () => Math.max(1, Math.ceil(totalItems / pageSize)),
     [totalItems, pageSize]
   );
 
@@ -40,6 +44,15 @@ export function usePagination({
     setPage(1);
   }, []);
 
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = Math.min(page * pageSize, totalItems);
+
+  /** Slices a data array for the current page */
+  const paginateData = useCallback(
+    <T,>(data: T[]): T[] => data.slice(startIndex, endIndex),
+    [startIndex, endIndex]
+  );
+
   return {
     page,
     pageSize,
@@ -49,9 +62,10 @@ export function usePagination({
     nextPage,
     prevPage,
     changePageSize,
+    paginateData,
     hasNextPage: page < totalPages,
     hasPrevPage: page > 1,
-    startIndex: (page - 1) * pageSize,
-    endIndex: Math.min(page * pageSize, totalItems),
+    startIndex,
+    endIndex,
   } as const;
 }

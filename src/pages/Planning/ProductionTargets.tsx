@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { productionTargetApi, type ProductionTarget, type TargetInput } from "../../api/planning";
 import PageMeta from "../../components/common/PageMeta";
+import TableSkeleton from '@/components/common/TableSkeleton';
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
@@ -113,6 +114,7 @@ export default function ProductionTargets() {
         )}
 
         {/* Targets Table */}
+        {loading ? <TableSkeleton rows={5} cols={6} /> : (
         <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-900/50">
@@ -126,9 +128,7 @@ export default function ProductionTargets() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {loading ? (
-                <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
-              ) : targets.length === 0 ? (
+              {targets.length === 0 ? (
                 <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">{buyerOrderId ? "No targets. Create them using Bulk Create." : "Enter an order ID."}</td></tr>
               ) : targets.map((t) => (
                 <tr key={t.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
@@ -171,6 +171,7 @@ export default function ProductionTargets() {
             </tbody>
           </table>
         </div>
+        )}
 
         {/* Bulk Create Modal */}
         {showBulk && (

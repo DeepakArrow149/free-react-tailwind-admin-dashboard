@@ -7,6 +7,12 @@ import {
   type OrderListParams,
 } from "../../../api/merchandising";
 import PageMeta from "../../../components/common/PageMeta";
+import { Pagination } from "../../../components/table";
+import TableSkeleton from '@/components/common/TableSkeleton';
+import ExportButton from '@/components/common/ExportButton';
+import { excelExportApi } from '../../../api/export';
+import { formatDateShort as formatDate, formatCurrency } from '@/core/utils';
+import NewOrderQuickStartModal from './components/NewOrderQuickStartModal';
 
 const STATUS_COLORS: Record<string, string> = {
   DRAFT: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
@@ -21,20 +27,13 @@ const STATUS_COLORS: Record<string, string> = {
 
 const STATUSES = ["", "DRAFT", "CONFIRMED", "IN_PRODUCTION", "READY_TO_SHIP", "SHIPPED", "INVOICED", "CLOSED", "CANCELLED"];
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-}
-
-function formatCurrency(value: number, currency: string) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 0 }).format(value);
-}
-
 export default function OrderList() {
   const [orders, setOrders] = useState<BuyerOrderSummary[]>([]);
   const [meta, setMeta] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 });
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(true);
+  const [newOrderOpen, setNewOrderOpen] = useState(false);
 
   const fetchOrders = useCallback(async (params?: Partial<OrderListParams>) => {
     setLoading(true);
@@ -74,6 +73,8 @@ export default function OrderList() {
           </div>
           <div className="flex flex-wrap gap-3 items-center">
             <select
+              aria-label="Status filter"
+              title="Status filter"
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
@@ -93,16 +94,20 @@ export default function OrderList() {
               onKeyDown={(e) => e.key === "Enter" && fetchOrders({ page: 1 })}
               className="h-10 rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:text-white/90"
             />
-            <Link
-              to="/merchandising/orders/new"
+            <ExportButton onExport={excelExportApi.orders} />
+            <button
+              type="button"
+              onClick={() => setNewOrderOpen(true)}
               className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
             >
               + New Order
-            </Link>
+            </button>
           </div>
         </div>
+        <NewOrderQuickStartModal open={newOrderOpen} onClose={() => setNewOrderOpen(false)} />
 
         {/* Table */}
+        {loading ? <TableSkeleton rows={5} cols={8} /> : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -121,9 +126,7 @@ export default function OrderList() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr><td colSpan={11} className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
-              ) : orders.length === 0 ? (
+              {orders.length === 0 ? (
                 <tr><td colSpan={11} className="px-4 py-8 text-center text-gray-400">No orders found</td></tr>
               ) : (
                 orders.map((o) => (
@@ -185,31 +188,18 @@ export default function OrderList() {
             </tbody>
           </table>
         </div>
+        )}
 
         {/* Pagination */}
-        {meta.totalPages > 1 && (
-          <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-100 dark:border-gray-800">
-            <p className="text-sm text-gray-500">
-              Page {meta.page} of {meta.totalPages}
-            </p>
-            <div className="flex gap-2">
-              <button
-                disabled={meta.page <= 1}
-                onClick={() => fetchOrders({ page: meta.page - 1 })}
-                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300"
-              >
-                Previous
-              </button>
-              <button
-                disabled={meta.page >= meta.totalPages}
-                onClick={() => fetchOrders({ page: meta.page + 1 })}
-                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
+        <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-800">
+          <Pagination
+            currentPage={meta.page}
+            totalPages={meta.totalPages}
+            onPageChange={(p) => fetchOrders({ page: p })}
+            totalItems={meta.total}
+            pageSize={meta.limit}
+          />
+        </div>
       </div>
     </>
   );

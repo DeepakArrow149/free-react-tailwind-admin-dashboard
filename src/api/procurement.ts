@@ -200,3 +200,27 @@ export const subcontractApi = {
   createInward: (data: Record<string, unknown>) => apiClient.post("/procurement/subcontract/inward", data),
   listPending: () => apiClient.get("/procurement/subcontract/pending"),
 };
+
+// ── Vendor Rating API ──
+export const vendorRatingApi = {
+  list: (params?: Record<string, string | number | boolean | undefined>) => apiClient.get("/procurement/vendor-ratings", { params }),
+  get: (id: number) => apiClient.get(`/procurement/vendor-ratings/${id}`),
+  generate: (data: Record<string, unknown>) => apiClient.post("/procurement/vendor-ratings/generate", data),
+};
+
+// ── Supplier Return API ──
+export const supplierReturnApi = {
+  list: (params?: Record<string, string | number | boolean | undefined>) => apiClient.get("/procurement/supplier-returns", { params }),
+  get: (id: number) => apiClient.get(`/procurement/supplier-returns/${id}`),
+  create: (data: Record<string, unknown>) => apiClient.post("/procurement/supplier-returns", data),
+  confirm: (id: number) => apiClient.post(`/procurement/supplier-returns/${id}/confirm`),
+};
+
+// ── Purchase Invoice API ──
+export const purchaseInvoiceApi = {
+  list: (params?: Record<string, string | number | boolean | undefined>) => apiClient.get("/procurement/purchase-invoices", { params }),
+  get: (id: number) => apiClient.get(`/procurement/purchase-invoices/${id}`),
+  create: (data: Record<string, unknown>) => apiClient.post("/procurement/purchase-invoices", data),
+  delete: (id: number) => apiClient.delete(`/procurement/purchase-invoices/${id}`),
+  markPaid: (id: number) => apiClient.post(`/procurement/purchase-invoices/${id}/mark-paid`),
+};

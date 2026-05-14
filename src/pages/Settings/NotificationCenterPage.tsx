@@ -85,7 +85,7 @@ export default function NotificationCenterPage() {
   };
 
   return (
-    <div className="p-6 max-w-[900px] mx-auto">
+    <div className="p-6 max-w-225 mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Notifications</h1>
@@ -128,7 +128,7 @@ export default function NotificationCenterPage() {
                 hover:shadow-md`}
               onClick={() => !n.isRead && markRead(n.id)}
             >
-              <div className="flex-shrink-0 mt-1 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+              <div className="shrink-0 mt-1 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                 {typeIcon(n.type)}
               </div>
               <div className="flex-1 min-w-0">
@@ -136,7 +136,7 @@ export default function NotificationCenterPage() {
                   <h3 className={`text-sm font-medium ${n.isRead ? "text-gray-600 dark:text-gray-400" : "text-gray-800 dark:text-white"}`}>
                     {n.title}
                   </h3>
-                  {!n.isRead && <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />}
+                  {!n.isRead && <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />}
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{n.message}</p>
                 <div className="flex items-center gap-3 mt-2">

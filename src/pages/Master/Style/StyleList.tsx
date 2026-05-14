@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router";
 import { masterApi, type StyleMaster, type ListParams } from "../../../api/master";
 import PageMeta from "../../../components/common/PageMeta";
+import TableSkeleton from '@/components/common/TableSkeleton';
 
 export default function StyleList() {
   const [styles, setStyles] = useState<StyleMaster[]>([]);
@@ -49,6 +50,7 @@ export default function StyleList() {
           </div>
         </div>
 
+        {loading ? <TableSkeleton rows={5} cols={6} /> : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -62,9 +64,7 @@ export default function StyleList() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
-              ) : styles.length === 0 ? (
+              {styles.length === 0 ? (
                 <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">No styles found</td></tr>
               ) : (
                 styles.map((s) => (
@@ -86,6 +86,7 @@ export default function StyleList() {
             </tbody>
           </table>
         </div>
+        )}
       </div>
     </>
   );

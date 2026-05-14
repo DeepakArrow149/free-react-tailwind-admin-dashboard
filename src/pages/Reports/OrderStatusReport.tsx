@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { listBuyerOrders, BuyerOrderSummary, OrderListParams } from "../../api/merchandising";
+import { ORDER_STATUSES } from '@erp/shared-types';
 import PageMeta from "../../components/common/PageMeta";
+import { Pagination } from "../../components/table";
 
 /* ── helpers ── */
 function fmtDate(iso?: string) {
@@ -10,7 +12,7 @@ function fmtDate(iso?: string) {
 function fmt(n: number) { return n.toLocaleString("en-IN"); }
 function fmtCur(n: number) { return "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 0 }); }
 
-const STATUS_ORDER = ["DRAFT", "CONFIRMED", "IN_PRODUCTION", "SHIPPED", "COMPLETED", "CANCELLED"] as const;
+const STATUS_ORDER = ORDER_STATUSES;
 const statusMeta: Record<string, { label: string; bg: string; text: string }> = {
   DRAFT:          { label: "Draft",         bg: "bg-gray-100 dark:bg-gray-700",        text: "text-gray-700 dark:text-gray-300" },
   CONFIRMED:      { label: "Confirmed",     bg: "bg-blue-100 dark:bg-blue-900/20",     text: "text-blue-700 dark:text-blue-400" },
@@ -91,7 +93,7 @@ export default function OrderStatusReport() {
           <input type="text" placeholder="Search order / buyer / style…" value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white w-64" />
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+          <select aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
             className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white">
             <option value="">All Statuses</option>
             {STATUS_ORDER.map((s) => <option key={s} value={s}>{statusMeta[s]?.label ?? s}</option>)}
@@ -188,15 +190,15 @@ export default function OrderStatusReport() {
         )}
 
         {/* pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 pt-1">
-            <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
-              className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-600 dark:text-gray-300">Prev</button>
-            <span className="px-3 py-1 text-sm text-gray-600 dark:text-gray-400">Page {page} / {totalPages}</span>
-            <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}
-              className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-600 dark:text-gray-300">Next</button>
-          </div>
-        )}
+        <div className="mt-2 pt-1">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(p) => setPage(p)}
+            totalItems={total}
+            pageSize={limit}
+          />
+        </div>
       </div>
     </>
   );

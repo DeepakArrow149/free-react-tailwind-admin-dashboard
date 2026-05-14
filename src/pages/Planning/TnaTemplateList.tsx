@@ -2,10 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router";
 import { tnaTemplateApi, type TnaTemplate } from "../../api/planning";
 import PageMeta from "../../components/common/PageMeta";
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-}
+import TableSkeleton from '@/components/common/TableSkeleton';
+import { formatDateShort as formatDate } from '@/core/utils';
 
 export default function TnaTemplateList() {
   const [templates, setTemplates] = useState<TnaTemplate[]>([]);
@@ -63,6 +61,7 @@ export default function TnaTemplateList() {
         </div>
 
         {/* Table */}
+        {loading ? <TableSkeleton rows={5} cols={4} /> : (
         <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-900/50">
@@ -74,9 +73,7 @@ export default function TnaTemplateList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {loading ? (
-                <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
-              ) : templates.length === 0 ? (
+              {templates.length === 0 ? (
                 <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-400">No templates found</td></tr>
               ) : templates.map((t) => (
                 <tr key={t.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
@@ -99,6 +96,7 @@ export default function TnaTemplateList() {
             </tbody>
           </table>
         </div>
+        )}
       </div>
     </>
   );

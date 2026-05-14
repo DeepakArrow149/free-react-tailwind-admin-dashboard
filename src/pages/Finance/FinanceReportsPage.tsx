@@ -1,9 +1,28 @@
 import { useState, useCallback } from "react";
 import { extendedReportApi } from "../../api/finance";
 import PageMeta from "../../components/common/PageMeta";
+import { PaginatedTable } from "../../components/table";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type R = any;
+interface FinanceReportRow {
+  accountName?: string;
+  lineItem?: string;
+  label?: string;
+  amount?: number;
+  balance?: number;
+  value?: number;
+  isTotal?: boolean;
+  indent?: boolean;
+  // AP Aging fields
+  supplier?: { name: string };
+  supplierId?: number;
+  invoiceNo?: string;
+  totalAmount?: number;
+  outstanding?: number;
+  daysDue?: number;
+  bucket?: string;
+}
+
+type R = FinanceReportRow;
 
 type Tab = "balanceSheet" | "profitLoss" | "cashFlow" | "fundFlow" | "apAging";
 
@@ -21,7 +40,7 @@ export default function FinanceReportsPage() {
     setLoading(true);
     setData([]);
     try {
-      let resp: R;
+      let resp: { data?: R[] } | R[] | undefined;
       switch (tab) {
         case "balanceSheet":
           resp = await extendedReportApi.balanceSheet(Number(fyId));
@@ -69,7 +88,7 @@ export default function FinanceReportsPage() {
           {needsFy && (
             <div>
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Financial Year ID</label>
-              <input value={fyId} onChange={e => setFyId(e.target.value)} placeholder="1"
+              <input value={fyId} onChange={e => setFyId(e.target.value)} placeholder="1" aria-label="Financial Year ID"
                 className="border rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white w-32" />
             </div>
           )}
@@ -77,12 +96,12 @@ export default function FinanceReportsPage() {
             <>
               <div>
                 <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">From</label>
-                <input type="date" value={from} onChange={e => setFrom(e.target.value)}
+                <input type="date" value={from} onChange={e => setFrom(e.target.value)} aria-label="Report from date"
                   className="border rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">To</label>
-                <input type="date" value={to} onChange={e => setTo(e.target.value)}
+                <input type="date" value={to} onChange={e => setTo(e.target.value)} aria-label="Report to date"
                   className="border rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
               </div>
             </>
@@ -96,6 +115,8 @@ export default function FinanceReportsPage() {
         {loading ? (
           <p className="text-gray-500 dark:text-gray-400">Loading report…</p>
         ) : data.length > 0 ? (
+          <PaginatedTable data={data} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
             {tab === "apAging" ? (
               <table className="min-w-full text-sm">
@@ -107,7 +128,7 @@ export default function FinanceReportsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {data.map((r: R, i: number) => (
+                  {pageData.map((r: R, i: number) => (
                     <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{r.supplier?.name ?? r.supplierId}</td>
                       <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{r.invoiceNo}</td>
@@ -135,7 +156,7 @@ export default function FinanceReportsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {data.map((r: R, i: number) => (
+                  {pageData.map((r: R, i: number) => (
                     <tr key={i} className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 ${r.isTotal ? "font-bold bg-gray-50 dark:bg-gray-700" : ""}`}>
                       <td className={`px-4 py-3 text-gray-900 dark:text-white ${r.indent ? "pl-8" : ""}`}>
                         {r.accountName ?? r.lineItem ?? r.label ?? `Row ${i + 1}`}
@@ -149,6 +170,8 @@ export default function FinanceReportsPage() {
               </table>
             )}
           </div>
+            )}
+          </PaginatedTable>
         ) : (
           <p className="text-gray-400 text-sm">Select parameters and click Generate to view the report.</p>
         )}

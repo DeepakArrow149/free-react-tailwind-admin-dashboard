@@ -2,6 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router";
 import { bomApi, type BomSummary } from "../../../api/costing";
 import PageMeta from "../../../components/common/PageMeta";
+import { Pagination } from "../../../components/table";
+import TableSkeleton from '@/components/common/TableSkeleton';
+import { formatCurrency, formatDateShort as formatDate } from '@/core/utils';
 
 const STATUS_COLORS: Record<string, string> = {
   DRAFT: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
@@ -10,14 +13,6 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const STATUSES = ["", "DRAFT", "APPROVED", "LOCKED"];
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 }).format(value);
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-}
 
 export default function BomList() {
   const [boms, setBoms] = useState<BomSummary[]>([]);
@@ -105,6 +100,7 @@ export default function BomList() {
         </div>
 
         {/* Table */}
+        {loading ? <TableSkeleton rows={5} cols={7} /> : (
         <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3">
           <table className="w-full table-auto text-sm">
             <thead>
@@ -115,9 +111,7 @@ export default function BomList() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr><td colSpan={9} className="px-4 py-12 text-center text-gray-400">Loading...</td></tr>
-              ) : boms.length === 0 ? (
+              {boms.length === 0 ? (
                 <tr><td colSpan={9} className="px-4 py-12 text-center text-gray-400">No BOMs found</td></tr>
               ) : (
                 boms.map((bom) => (
@@ -159,26 +153,16 @@ export default function BomList() {
             </tbody>
           </table>
         </div>
+        )}
 
         {/* Pagination */}
-        {meta.totalPages > 1 && (
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-500">
-              Showing {(meta.page - 1) * meta.limit + 1}–{Math.min(meta.page * meta.limit, meta.total)} of {meta.total}
-            </p>
-            <div className="flex gap-1">
-              {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setMeta((m) => ({ ...m, page: p }))}
-                  className={`h-8 min-w-8 rounded text-sm ${p === meta.page ? "bg-brand-500 text-white" : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"}`}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        <Pagination
+          currentPage={meta.page}
+          totalPages={meta.totalPages}
+          onPageChange={(p) => fetchBoms({ page: p })}
+          totalItems={meta.total}
+          pageSize={meta.limit}
+        />
       </div>
     </>
   );

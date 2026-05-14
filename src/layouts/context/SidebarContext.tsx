@@ -9,6 +9,7 @@ import { SIDEBAR } from '@/core/constants';
 interface SidebarContextType {
   isExpanded: boolean;
   isMobileOpen: boolean;
+  isMobile: boolean;
   isHovered: boolean;
   toggleSidebar: () => void;
   toggleMobileSidebar: () => void;
@@ -33,7 +34,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth < SIDEBAR.MOBILE_BREAKPOINT;
+      const mobile = window.innerWidth < SIDEBAR.DESKTOP_BREAKPOINT;
       setIsMobile(mobile);
       if (!mobile) setIsMobileOpen(false);
     };
@@ -51,6 +52,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
       value={{
         isExpanded: isMobile ? false : isExpanded,
         isMobileOpen,
+        isMobile,
         isHovered,
         toggleSidebar,
         toggleMobileSidebar,

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { fnfApi, FnFSettlement, employeeApi, Employee } from "../../api/hrm";
 import { toastSuccess, toastError } from "../../utils/toast";
 import PageMeta from "../../components/common/PageMeta";
+import { PaginatedTable } from "../../components/table";
 
 function fmtDate(iso?: string) {
   if (!iso) return "—";
@@ -106,6 +107,8 @@ export default function FnFPage() {
         )}
 
         {loading ? <p className="text-gray-400 py-8 text-center">Loading…</p> : (
+          <PaginatedTable data={rows} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700">
@@ -116,7 +119,7 @@ export default function FnFPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {rows.map((r) => {
+                {pageData.map((r) => {
                   const meta = statusMeta[r.status] ?? statusMeta.DRAFT;
                   return (
                     <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
@@ -152,6 +155,8 @@ export default function FnFPage() {
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
         )}
       </div>
     </>

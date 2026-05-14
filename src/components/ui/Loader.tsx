@@ -38,7 +38,7 @@ export function Loader({ size = 'md', className, fullPage = false }: LoaderProps
 
   if (fullPage) {
     return (
-      <div className="fixed inset-0 z-99999 flex items-center justify-center bg-white/80 dark:bg-gray-900/80">
+      <div className="fixed inset-0 z-70 flex items-center justify-center bg-white/80 dark:bg-gray-900/80">
         {spinner}
       </div>
     );

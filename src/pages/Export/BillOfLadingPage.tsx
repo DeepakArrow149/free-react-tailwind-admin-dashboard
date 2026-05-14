@@ -11,7 +11,7 @@ export default function BillOfLadingPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    try { const { data } = await blApi.list(); setItems(data.data); } catch { toast.error('Failed to load B/L'); }
+    try { const { data } = await blApi.list(); setItems(data.data || []); } catch { toast.error('Failed to load B/L'); }
     setLoading(false);
   }, []);
 

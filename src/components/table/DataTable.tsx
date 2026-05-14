@@ -114,6 +114,8 @@ export function DataTable<T>({
               <th className="px-4 py-3 w-12">
                 <input
                   type="checkbox"
+                  aria-label="Select all rows"
+                  title="Select all rows"
                   checked={selectedKeys?.size === data.length && data.length > 0}
                   onChange={toggleAll}
                   className="h-4 w-4 rounded border-gray-300 text-brand-500 dark:border-gray-700"
@@ -171,7 +173,7 @@ export function DataTable<T>({
                   key={key}
                   className={cn(
                     'border-b border-gray-100 transition-colors dark:border-gray-800',
-                    onRowClick && 'cursor-pointer hover:bg-gray-50 dark:hover:bg-white/[0.02]',
+                    onRowClick && 'cursor-pointer hover:bg-gray-50 dark:hover:bg-white/2',
                     isSelected && 'bg-brand-50/50 dark:bg-brand-500/5'
                   )}
                   onClick={() => onRowClick?.(row)}
@@ -180,6 +182,8 @@ export function DataTable<T>({
                     <td className="px-4 py-3">
                       <input
                         type="checkbox"
+                        aria-label="Select row"
+                        title="Select row"
                         checked={isSelected}
                         onChange={() => toggleRow(key)}
                         onClick={(e) => e.stopPropagation()}

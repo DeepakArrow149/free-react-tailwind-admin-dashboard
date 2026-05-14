@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { lcApi } from '../../api/export';
 import type { LetterOfCredit } from '../../api/export';
 import { toast } from 'sonner';
+import { PaginatedTable } from '../../components/table';
 
 export default function LcManagementPage() {
   const [items, setItems] = useState<LetterOfCredit[]>([]);
@@ -11,7 +12,7 @@ export default function LcManagementPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    try { const { data } = await lcApi.list(); setItems(data.data); } catch { toast.error('Failed to load LC'); }
+    try { const { data } = await lcApi.list(); setItems(data.data || []); } catch { toast.error('Failed to load LC'); }
     setLoading(false);
   }, []);
 
@@ -28,7 +29,7 @@ export default function LcManagementPage() {
   };
 
   const updateStatus = async (id: number, status: string) => {
-    try { await lcApi.updateStatus(id, status); toast.success(`Status → ${status}`); load(); } catch { toast.error('Update failed'); }
+    try { await lcApi.updateStatus(id, { status }); toast.success(`Status → ${status}`); load(); } catch { toast.error('Update failed'); }
   };
 
   return (
@@ -76,6 +77,13 @@ export default function LcManagementPage() {
         ))}
       </div>
 
+      {loading ? (
+        <p className="text-center py-8 text-gray-400">Loading…</p>
+      ) : items.length === 0 ? (
+        <p className="text-center py-8 text-gray-400">No LCs found</p>
+      ) : (
+      <PaginatedTable data={items} pageSize={20}>
+        {(pageData) => (
       <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-50 dark:bg-gray-700">
@@ -86,12 +94,7 @@ export default function LcManagementPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {loading ? (
-              <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-400">Loading…</td></tr>
-            ) : items.length === 0 ? (
-              <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-400">No LCs found</td></tr>
-            ) : (
-              items.map((lc) => (
+              {pageData.map((lc) => (
                 <tr key={lc.id} className="hover:bg-gray-50 dark:hover:bg-gray-750">
                   <td className="px-4 py-3 font-medium">{lc.lcNo}</td>
                   <td className="px-4 py-3">{lc.lcDate ? new Date(lc.lcDate).toLocaleDateString() : '-'}</td>
@@ -105,11 +108,13 @@ export default function LcManagementPage() {
                     {lc.status === 'ACTIVE' && <button onClick={() => updateStatus(lc.id, 'UTILIZED')} className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-700">Utilized</button>}
                   </td>
                 </tr>
-              ))
-            )}
+              ))}
           </tbody>
         </table>
       </div>
+        )}
+      </PaginatedTable>
+      )}
     </div>
   );
 }

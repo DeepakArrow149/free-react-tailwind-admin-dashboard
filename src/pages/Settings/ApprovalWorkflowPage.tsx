@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import client from "../../api/client";
+import { APPROVAL_MODULES, SYSTEM_ROLES } from '@erp/shared-types';
+import { PaginatedTable } from "../../components/table";
 
 /* ── Types ── */
 interface ApprovalRule {
@@ -26,13 +28,9 @@ interface ApprovalRequest {
   createdAt: string;
 }
 
-const MODULES = [
-  "PURCHASE_ORDER", "SALES_INVOICE", "GRN", "PAYMENT_OUT",
-  "CREDIT_NOTE", "DEBIT_NOTE", "JOURNAL_ENTRY", "EXPENSE",
-  "BUYER_ORDER", "PRODUCTION_ORDER",
-];
+const MODULES = [...APPROVAL_MODULES];
 
-const ROLES = ["Admin", "FinanceManager", "Finance", "Merchandiser", "Planning", "Production", "QC", "Warehouse", "HR"];
+const ROLES = [...SYSTEM_ROLES];
 
 export default function ApprovalWorkflowPage() {
   const [tab, setTab] = useState<"rules" | "requests">("rules");
@@ -76,7 +74,7 @@ export default function ApprovalWorkflowPage() {
       toast.success("Rule created");
       setShowCreate(false);
       fetchRules();
-    } catch (e: any) { toast.error(e.response?.data?.message || "Failed"); }
+    } catch (e: unknown) { toast.error((e as Record<string, Record<string, Record<string, string>>>)?.response?.data?.message || "Failed"); }
   };
 
   const handleToggle = async (rule: ApprovalRule) => {
@@ -93,7 +91,7 @@ export default function ApprovalWorkflowPage() {
       await client.patch(`/admin/approval-requests/${id}/decide`, { decision, remarks });
       toast.success(`Request ${decision.toLowerCase()}`);
       fetchRequests();
-    } catch (e: any) { toast.error(e.response?.data?.message || "Failed"); }
+    } catch (e: unknown) { toast.error((e as Record<string, Record<string, Record<string, string>>>)?.response?.data?.message || "Failed"); }
   };
 
   const statusBadge = (s: string) => {
@@ -102,7 +100,7 @@ export default function ApprovalWorkflowPage() {
   };
 
   return (
-    <div className="p-6 max-w-[1200px] mx-auto">
+    <div className="p-6 max-w-300 mx-auto">
       <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Approval Workflows</h1>
 
       <div className="flex gap-1 mb-6 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 w-fit">
@@ -118,6 +116,13 @@ export default function ApprovalWorkflowPage() {
         <>
           <button onClick={() => setShowCreate(true)} className="mb-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">+ Add Rule</button>
 
+          {loading ? (
+            <p className="text-center py-8 text-gray-400">Loading...</p>
+          ) : rules.length === 0 ? (
+            <p className="text-center py-8 text-gray-400">No rules configured</p>
+          ) : (
+          <PaginatedTable data={rules} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
@@ -131,12 +136,7 @@ export default function ApprovalWorkflowPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                {loading ? (
-                  <tr><td colSpan={6} className="text-center py-8 text-gray-400">Loading...</td></tr>
-                ) : rules.length === 0 ? (
-                  <tr><td colSpan={6} className="text-center py-8 text-gray-400">No rules configured</td></tr>
-                ) : (
-                  rules.map((r) => (
+                  {pageData.map((r) => (
                     <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="p-3 font-medium">{r.module}</td>
                       <td className="p-3 text-xs font-mono">{r.condition || "—"}</td>
@@ -151,16 +151,25 @@ export default function ApprovalWorkflowPage() {
                         </button>
                       </td>
                     </tr>
-                  ))
-                )}
+                  ))}
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
+          )}
         </>
       )}
 
       {/* REQUESTS TAB */}
       {tab === "requests" && (
+        loading ? (
+          <p className="text-center py-8 text-gray-400">Loading...</p>
+        ) : requests.length === 0 ? (
+          <p className="text-center py-8 text-gray-400">No pending approvals</p>
+        ) : (
+        <PaginatedTable data={requests} pageSize={20}>
+          {(pageData) => (
         <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
@@ -175,12 +184,7 @@ export default function ApprovalWorkflowPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {loading ? (
-                <tr><td colSpan={7} className="text-center py-8 text-gray-400">Loading...</td></tr>
-              ) : requests.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-8 text-gray-400">No pending approvals</td></tr>
-              ) : (
-                requests.map((r) => (
+                {pageData.map((r) => (
                   <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <td className="p-3">{r.id}</td>
                     <td className="p-3 font-medium">{r.module}</td>
@@ -197,11 +201,13 @@ export default function ApprovalWorkflowPage() {
                       )}
                     </td>
                   </tr>
-                ))
-              )}
+                ))}
             </tbody>
           </table>
         </div>
+          )}
+        </PaginatedTable>
+        )
       )}
 
       {/* CREATE RULE MODAL */}
@@ -211,22 +217,22 @@ export default function ApprovalWorkflowPage() {
             <h2 className="text-lg font-semibold mb-4">Add Approval Rule</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Module</label>
-                <select value={form.module} onChange={(e) => setForm({ ...form, module: e.target.value })} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600">
+                <label htmlFor="rule-module" className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Module</label>
+                <select id="rule-module" value={form.module} onChange={(e) => setForm({ ...form, module: e.target.value })} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600">
                   {MODULES.map((m) => <option key={m}>{m}</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Condition Field</label>
-                  <select value={form.conditionField} onChange={(e) => setForm({ ...form, conditionField: e.target.value })} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600">
+                  <label htmlFor="rule-condition-field" className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Condition Field</label>
+                  <select id="rule-condition-field" value={form.conditionField} onChange={(e) => setForm({ ...form, conditionField: e.target.value })} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600">
                     <option value="amount">Amount</option>
                     <option value="quantity">Quantity</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Operator</label>
-                  <select value={form.conditionOp} onChange={(e) => setForm({ ...form, conditionOp: e.target.value })} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600">
+                  <label htmlFor="rule-condition-op" className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Operator</label>
+                  <select id="rule-condition-op" value={form.conditionOp} onChange={(e) => setForm({ ...form, conditionOp: e.target.value })} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600">
                     <option value="gt">Greater than</option>
                     <option value="lt">Less than</option>
                     <option value="gte">≥</option>
@@ -234,20 +240,20 @@ export default function ApprovalWorkflowPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Value</label>
-                  <input type="number" value={form.conditionValue} onChange={(e) => setForm({ ...form, conditionValue: e.target.value })} placeholder="e.g. 50000" className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" />
+                  <label htmlFor="rule-condition-value" className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Value</label>
+                  <input id="rule-condition-value" type="number" value={form.conditionValue} onChange={(e) => setForm({ ...form, conditionValue: e.target.value })} placeholder="e.g. 50000" className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Approver Role</label>
-                  <select value={form.approverRole} onChange={(e) => setForm({ ...form, approverRole: e.target.value })} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600">
+                  <label htmlFor="rule-approver-role" className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Approver Role</label>
+                  <select id="rule-approver-role" value={form.approverRole} onChange={(e) => setForm({ ...form, approverRole: e.target.value })} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600">
                     {ROLES.map((r) => <option key={r}>{r}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Level</label>
-                  <input type="number" min={1} max={5} value={form.approverLevel} onChange={(e) => setForm({ ...form, approverLevel: Number(e.target.value) })} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" />
+                  <label htmlFor="rule-approver-level" className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Level</label>
+                  <input id="rule-approver-level" type="number" min={1} max={5} value={form.approverLevel} onChange={(e) => setForm({ ...form, approverLevel: Number(e.target.value) })} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" />
                 </div>
               </div>
             </div>

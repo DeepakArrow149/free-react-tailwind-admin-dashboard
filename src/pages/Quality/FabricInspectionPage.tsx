@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import PageMeta from '../../components/common/PageMeta';
+import { Pagination } from '../../components/table';
 import { fabricApi, FabricInspection } from '../../api/quality';
 
 const resultBadge = (r?: string) => {
@@ -35,8 +36,8 @@ export default function FabricInspectionPage() {
     const params: Record<string, string | number | undefined> = { page, limit: 20 };
     if (filterGrnId) params.grnId = filterGrnId;
     const res = await fabricApi.list(params);
-    setItems(res.data.data.data);
-    setTotalPages(res.data.data.totalPages);
+    setItems(res.data.data || []);
+    setTotalPages(res.data.meta?.totalPages ?? 1);
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -70,15 +71,15 @@ export default function FabricInspectionPage() {
         {showForm && (
           <div className="mb-6 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-3">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div><label className="block text-xs text-gray-500 mb-1">Roll ID</label><input className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.rollId ?? ''} onChange={e => setForm({ ...form, rollId: e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">GRN ID</label><input type="number" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.grnId ?? ''} onChange={e => setForm({ ...form, grnId: +e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">Inspection Date*</label><input type="date" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectionDate ?? ''} onChange={e => setForm({ ...form, inspectionDate: e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">Inspector</label><input className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectorName ?? ''} onChange={e => setForm({ ...form, inspectorName: e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Roll ID</label><input aria-label="Roll ID" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.rollId ?? ''} onChange={e => setForm({ ...form, rollId: e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">GRN ID</label><input type="number" aria-label="GRN ID" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.grnId ?? ''} onChange={e => setForm({ ...form, grnId: +e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Inspection Date*</label><input type="date" aria-label="Inspection Date" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectionDate ?? ''} onChange={e => setForm({ ...form, inspectionDate: e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Inspector</label><input aria-label="Inspector" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectorName ?? ''} onChange={e => setForm({ ...form, inspectorName: e.target.value })} /></div>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div><label className="block text-xs text-gray-500 mb-1">Inspected Length (yards)*</label><input type="number" step="0.01" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectedLength ?? ''} onChange={e => setForm({ ...form, inspectedLength: +e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">Inspected Width (inches)*</label><input type="number" step="0.01" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectedWidth ?? ''} onChange={e => setForm({ ...form, inspectedWidth: +e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">Total Defect Points*</label><input type="number" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.totalDefectPoints} onChange={e => setForm({ ...form, totalDefectPoints: +e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Inspected Length (yards)*</label><input type="number" step="0.01" aria-label="Inspected Length (yards)" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectedLength ?? ''} onChange={e => setForm({ ...form, inspectedLength: +e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Inspected Width (inches)*</label><input type="number" step="0.01" aria-label="Inspected Width (inches)" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectedWidth ?? ''} onChange={e => setForm({ ...form, inspectedWidth: +e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Total Defect Points*</label><input type="number" aria-label="Total Defect Points" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.totalDefectPoints} onChange={e => setForm({ ...form, totalDefectPoints: +e.target.value })} /></div>
             </div>
 
             {sqYards > 0 && (
@@ -91,13 +92,13 @@ export default function FabricInspectionPage() {
               </div>
             )}
 
-            <div><label className="block text-xs text-gray-500 mb-1">Remarks</label><textarea className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" rows={2} value={form.remarks ?? ''} onChange={e => setForm({ ...form, remarks: e.target.value })} /></div>
+            <div><label className="block text-xs text-gray-500 mb-1">Remarks</label><textarea aria-label="Remarks" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" rows={2} value={form.remarks ?? ''} onChange={e => setForm({ ...form, remarks: e.target.value })} /></div>
             <button onClick={handleCreate} className="px-5 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">Create</button>
           </div>
         )}
 
         <div className="flex gap-3 mb-4">
-          <input className="border rounded px-3 py-1.5 text-sm dark:bg-gray-800 dark:border-gray-700" placeholder="Filter by GRN ID" value={filterGrnId} onChange={e => { setFilterGrnId(e.target.value); setPage(1); }} />
+          <input aria-label="Filter by GRN ID" className="border rounded px-3 py-1.5 text-sm dark:bg-gray-800 dark:border-gray-700" placeholder="Filter by GRN ID" value={filterGrnId} onChange={e => { setFilterGrnId(e.target.value); setPage(1); }} />
         </div>
 
         <div className="overflow-x-auto">
@@ -122,10 +123,13 @@ export default function FabricInspectionPage() {
             </tbody>
           </table>
         </div>
-        <div className="flex justify-between items-center mt-3">
-          <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-700">Prev</button>
-          <span className="text-sm text-gray-500">Page {page}/{totalPages}</span>
-          <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-700">Next</button>
+        <div className="mt-3">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(p) => setPage(p)}
+            pageSize={20}
+          />
         </div>
       </div>
     </>

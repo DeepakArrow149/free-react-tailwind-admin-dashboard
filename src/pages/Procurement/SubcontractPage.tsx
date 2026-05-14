@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { subcontractApi } from '../../api/procurement';
 import type { SubcontractOutward } from '../../api/procurement';
 import { toast } from 'sonner';
+import { PaginatedTable } from '../../components/table';
 
 export default function SubcontractPage() {
   const [tab, setTab] = useState<'pending' | 'outward' | 'create'>('pending');
@@ -93,6 +94,13 @@ export default function SubcontractPage() {
 
       {/* ─── Pending Tab ─── */}
       {tab === 'pending' && (
+        loading ? (
+          <p className="text-center py-8 text-gray-400">Loading…</p>
+        ) : pending.length === 0 ? (
+          <p className="text-center py-8 text-gray-400">No pending subcontracts</p>
+        ) : (
+        <PaginatedTable data={pending} pageSize={20}>
+          {(pageData) => (
         <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <table className="min-w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-700">
@@ -103,12 +111,7 @@ export default function SubcontractPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {loading ? (
-                <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-400">Loading…</td></tr>
-              ) : pending.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-400">No pending subcontracts</td></tr>
-              ) : (
-                pending.map((p) => (
+                {pageData.map((p) => (
                   <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-750">
                     <td className="px-4 py-3 font-medium">{p.challanNo}</td>
                     <td className="px-4 py-3">{p.supplier?.name || p.supplierId}</td>
@@ -123,11 +126,13 @@ export default function SubcontractPage() {
                       </button>
                     </td>
                   </tr>
-                ))
-              )}
+                ))}
             </tbody>
           </table>
         </div>
+          )}
+        </PaginatedTable>
+        )
       )}
 
       {/* ─── View Challan Tab ─── */}

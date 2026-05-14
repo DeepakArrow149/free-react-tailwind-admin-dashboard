@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router";
 import { masterApi, type Buyer, type ListParams } from "../../../api/master";
 import PageMeta from "../../../components/common/PageMeta";
+import { Pagination } from "@/components/table";
+import TableSkeleton from '@/components/common/TableSkeleton';
 
 export default function BuyerList() {
   const [buyers, setBuyers] = useState<Buyer[]>([]);
@@ -63,6 +65,7 @@ export default function BuyerList() {
         </div>
 
         {/* Table */}
+        {loading ? <TableSkeleton rows={5} cols={7} /> : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -77,9 +80,7 @@ export default function BuyerList() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
-              ) : buyers.length === 0 ? (
+              {buyers.length === 0 ? (
                 <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">No buyers found</td></tr>
               ) : (
                 buyers.map((b) => (
@@ -116,31 +117,18 @@ export default function BuyerList() {
             </tbody>
           </table>
         </div>
+        )}
 
         {/* Pagination */}
-        {meta.totalPages > 1 && (
-          <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-100 dark:border-gray-800">
-            <p className="text-sm text-gray-500">
-              Page {meta.page} of {meta.totalPages}
-            </p>
-            <div className="flex gap-2">
-              <button
-                disabled={meta.page <= 1}
-                onClick={() => fetchBuyers({ page: meta.page - 1 })}
-                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300"
-              >
-                Previous
-              </button>
-              <button
-                disabled={meta.page >= meta.totalPages}
-                onClick={() => fetchBuyers({ page: meta.page + 1 })}
-                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
+        <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-800">
+          <Pagination
+            currentPage={meta.page}
+            totalPages={meta.totalPages}
+            onPageChange={(p) => fetchBuyers({ page: p })}
+            totalItems={meta.total}
+            pageSize={meta.limit}
+          />
+        </div>
       </div>
     </>
   );

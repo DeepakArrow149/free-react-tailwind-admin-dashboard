@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { fixedAssetApi } from "../../api/finance";
 import { toastSuccess, toastError } from "../../utils/toast";
 import PageMeta from "../../components/common/PageMeta";
+import { PaginatedTable } from "../../components/table";
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
@@ -13,8 +14,19 @@ const statusColors: Record<string, string> = {
   FULLY_DEPRECIATED: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type R = any;
+interface R {
+  id: number;
+  assetCode: string;
+  assetName: string;
+  category?: string;
+  purchaseDate?: string;
+  purchaseCost?: number;
+  usefulLifeMonths?: number;
+  salvageValue?: number;
+  location?: string;
+  writtenDownValue?: number;
+  status?: string;
+}
 
 export default function FixedAssetsPage() {
   const [assets, setAssets] = useState<R[]>([]);
@@ -30,7 +42,7 @@ export default function FixedAssetsPage() {
 
   const fetchAssets = useCallback(async () => {
     setLoading(true);
-    try { const resp = await fixedAssetApi.list(); setAssets(resp.data ?? resp ?? []); } catch { setAssets([]); }
+    try { const resp = await fixedAssetApi.list(); setAssets(resp.data ?? []); } catch { setAssets([]); }
     setLoading(false);
   }, []);
 
@@ -116,6 +128,8 @@ export default function FixedAssetsPage() {
 
         {/* Table */}
         {loading ? <p className="text-gray-500 dark:text-gray-400">Loading…</p> : (
+          <PaginatedTable data={assets} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700">
@@ -126,7 +140,7 @@ export default function FixedAssetsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {assets.map((a: R) => (
+                {pageData.map((a: R) => (
                   <tr key={a.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{a.assetCode}</td>
                     <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{a.assetName}</td>
@@ -148,6 +162,8 @@ export default function FixedAssetsPage() {
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
         )}
       </div>
     </>

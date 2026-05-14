@@ -5,6 +5,7 @@ import PageMeta from "../../../components/common/PageMeta";
 import Label from "../../../components/form/Label";
 import Input from "../../../components/form/input/InputField";
 import Button from "../../../components/ui/button/Button";
+import { useMaterialTypes } from '@/hooks/useMasterLookups';
 
 interface MaterialCategory {
   id: number;
@@ -69,23 +70,16 @@ export default function MaterialForm() {
   // Load lookup data
   useEffect(() => {
     Promise.all([
-      masterApi.listMaterials({ limit: 0 }).catch(() => null), // just for categories if we need them
+      masterApi.listMaterialCategories(),
       masterApi.listSuppliers({ limit: 100 }),
       masterApi.listUnits(),
-    ]).then(([, suppRes, unitRes]) => {
+    ]).then(([catRes, suppRes, unitRes]) => {
+      if (catRes?.data?.data) setCategories(catRes.data.data as unknown as MaterialCategory[]);
       if (suppRes) setSuppliers(suppRes.data.data as unknown as Supplier[]);
       if (unitRes) setUnits(unitRes.data.data as unknown as UOM[]);
+    }).catch((err) => {
+      console.error('Failed to load lookup data:', err);
     });
-
-    // Material categories
-    fetch("http://localhost:4000/api/master/material-categories", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
-    })
-      .then((r) => r.json())
-      .then((res) => {
-        if (res.success && Array.isArray(res.data)) setCategories(res.data);
-      })
-      .catch(() => {});
   }, []);
 
   // Load material for edit

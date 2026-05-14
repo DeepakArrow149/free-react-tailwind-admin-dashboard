@@ -583,8 +583,13 @@ export const AiChatDrawer: React.FC = () => {
             {error && (
               <div className="mx-3 mb-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center justify-between">
                 <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
-                <button onClick={clearError} className="text-red-400 hover:text-red-600">
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button
+                  type="button"
+                  onClick={clearError}
+                  className="text-red-400 hover:text-red-600"
+                  aria-label="Dismiss error"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>

@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import client from "../../api/client";
+import { PaginatedTable } from "../../components/table";
+import TableSkeleton from '@/components/common/TableSkeleton';
 
 /* ── Types ── */
 interface EInvoice {
@@ -38,6 +40,13 @@ interface EWayBill {
   transMode: string | null;
   vehicleNo: string | null;
   transDistance: number | null;
+  invoiceId?: number;
+  eInvoiceId?: number;
+  fromPincode?: string | null;
+  toPincode?: string | null;
+  invoice?: { id: number; invoiceNo: string } | null;
+  eInvoice?: { irn: string | null } | null;
+  cancelReason?: string | null;
 }
 
 interface SalesInvoice {
@@ -52,7 +61,7 @@ interface SalesInvoice {
 export default function EInvoicePage() {
   const [tab, setTab] = useState<"einvoice" | "ewb">("einvoice");
   const [eInvoices, setEInvoices] = useState<EInvoice[]>([]);
-  const [ewayBills, setEwayBills] = useState<any[]>([]);
+  const [ewayBills, setEwayBills] = useState<EWayBill[]>([]);
   const [loading, setLoading] = useState(false);
 
   /* Generate modal */
@@ -119,7 +128,7 @@ export default function EInvoicePage() {
       setShowGenerate(false);
       setSelectedInvoiceId(""); setGstin("");
       fetchEInvoices();
-    } catch (e: any) { toast.error(e.response?.data?.message || "Failed"); }
+    } catch (e: unknown) { toast.error((e as Record<string, Record<string, Record<string, string>>>)?.response?.data?.message || "Failed"); }
   };
 
   /* Generate E-Way Bill */
@@ -136,7 +145,7 @@ export default function EInvoicePage() {
       setShowEwbGenerate(false);
       setEwbForm({ invoiceId: "", eInvoiceId: "", transporterName: "", transMode: "ROAD", vehicleNo: "", transDistance: "", fromPincode: "", toPincode: "" });
       fetchEwayBills();
-    } catch (e: any) { toast.error(e.response?.data?.message || "Failed"); }
+    } catch (e: unknown) { toast.error((e as Record<string, Record<string, Record<string, string>>>)?.response?.data?.message || "Failed"); }
   };
 
   /* Cancel */
@@ -150,7 +159,7 @@ export default function EInvoicePage() {
       toast.success("Cancelled");
       setCancelId(null); setCancelReason("");
       if (cancelType === "einvoice") fetchEInvoices(); else fetchEwayBills();
-    } catch (e: any) { toast.error(e.response?.data?.message || "Failed"); }
+    } catch (e: unknown) { toast.error((e as Record<string, Record<string, Record<string, string>>>)?.response?.data?.message || "Failed"); }
   };
 
   const statusBadge = (status: string) => {
@@ -165,7 +174,7 @@ export default function EInvoicePage() {
   };
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto">
+    <div className="p-6 max-w-350 mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">GST E-Invoice & E-Way Bill</h1>
       </div>
@@ -213,6 +222,9 @@ export default function EInvoicePage() {
           </div>
 
           {/* Table */}
+          {loading ? <TableSkeleton rows={5} cols={9} /> : (
+          <PaginatedTable data={eInvoices} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
@@ -229,12 +241,10 @@ export default function EInvoicePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                {loading ? (
-                  <tr><td colSpan={9} className="text-center py-8 text-gray-400">Loading...</td></tr>
-                ) : eInvoices.length === 0 ? (
+                {eInvoices.length === 0 ? (
                   <tr><td colSpan={9} className="text-center py-8 text-gray-400">No E-Invoices found</td></tr>
                 ) : (
-                  eInvoices.map((e) => (
+                  pageData.map((e) => (
                     <tr key={e.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="p-3 font-medium">{e.invoice?.invoiceNo || `INV-${e.invoiceId}`}</td>
                       <td className="p-3">{e.invoice?.buyer?.name || "—"}</td>
@@ -258,6 +268,9 @@ export default function EInvoicePage() {
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
+          )}
         </>
       )}
 
@@ -273,6 +286,9 @@ export default function EInvoicePage() {
             </button>
           </div>
 
+          {loading ? <TableSkeleton rows={5} cols={10} /> : (
+          <PaginatedTable data={ewayBills} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
@@ -290,16 +306,14 @@ export default function EInvoicePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                {loading ? (
-                  <tr><td colSpan={10} className="text-center py-8 text-gray-400">Loading...</td></tr>
-                ) : ewayBills.length === 0 ? (
+                {ewayBills.length === 0 ? (
                   <tr><td colSpan={10} className="text-center py-8 text-gray-400">No E-Way Bills found</td></tr>
                 ) : (
-                  ewayBills.map((e: any) => (
+                  pageData.map((e) => (
                     <tr key={e.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="p-3 font-mono text-xs">{e.ewbNo || "—"}</td>
                       <td className="p-3">{e.invoice?.invoiceNo || `INV-${e.invoiceId}`}</td>
-                      <td className="p-3 text-xs">{e.eInvoice?.irn ? e.eInvoice.irn.substring(0, 15) + "..." : "—"}</td>
+                      <td className="p-3 text-xs">{e.eInvoice?.irn ? String(e.eInvoice.irn).substring(0, 15) + "..." : "—"}</td>
                       <td className="p-3">{e.transporterName || "—"}</td>
                       <td className="p-3">{e.transMode || "—"}</td>
                       <td className="p-3">{e.vehicleNo || "—"}</td>
@@ -320,6 +334,9 @@ export default function EInvoicePage() {
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
+          )}
         </>
       )}
 
@@ -334,6 +351,7 @@ export default function EInvoicePage() {
                 <select
                   value={selectedInvoiceId}
                   onChange={(e) => setSelectedInvoiceId(Number(e.target.value))}
+                  aria-label="Sales Invoice"
                   className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600"
                 >
                   <option value="">Select invoice...</option>
@@ -350,6 +368,7 @@ export default function EInvoicePage() {
                   value={gstin}
                   onChange={(e) => setGstin(e.target.value)}
                   placeholder="29AABCU9603R1ZM"
+                  aria-label="Seller GSTIN"
                   className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600"
                 />
               </div>
@@ -358,6 +377,7 @@ export default function EInvoicePage() {
                 <select
                   value={supplyType}
                   onChange={(e) => setSupplyType(e.target.value)}
+                  aria-label="Supply Type"
                   className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600"
                 >
                   {["B2B", "B2C", "SEZWP", "SEZWOP", "EXPWP", "EXPWOP"].map((t) => (
@@ -385,6 +405,7 @@ export default function EInvoicePage() {
                 <select
                   value={ewbForm.invoiceId}
                   onChange={(e) => setEwbForm({ ...ewbForm, invoiceId: Number(e.target.value) })}
+                  aria-label="Sales Invoice"
                   className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600"
                 >
                   <option value="">Select invoice...</option>
@@ -398,6 +419,7 @@ export default function EInvoicePage() {
                 <select
                   value={ewbForm.eInvoiceId}
                   onChange={(e) => setEwbForm({ ...ewbForm, eInvoiceId: Number(e.target.value) })}
+                  aria-label="Link E-Invoice"
                   className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600"
                 >
                   <option value="">None</option>
@@ -409,11 +431,11 @@ export default function EInvoicePage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Transporter Name</label>
-                  <input value={ewbForm.transporterName} onChange={(e) => setEwbForm({ ...ewbForm, transporterName: e.target.value })} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" />
+                  <input value={ewbForm.transporterName} onChange={(e) => setEwbForm({ ...ewbForm, transporterName: e.target.value })} aria-label="Transporter Name" className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" />
                 </div>
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Mode</label>
-                  <select value={ewbForm.transMode} onChange={(e) => setEwbForm({ ...ewbForm, transMode: e.target.value })} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600">
+                  <select value={ewbForm.transMode} onChange={(e) => setEwbForm({ ...ewbForm, transMode: e.target.value })} aria-label="Transport Mode" className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600">
                     {["ROAD", "RAIL", "AIR", "SHIP"].map((m) => <option key={m}>{m}</option>)}
                   </select>
                 </div>
@@ -421,21 +443,21 @@ export default function EInvoicePage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Vehicle No</label>
-                  <input value={ewbForm.vehicleNo} onChange={(e) => setEwbForm({ ...ewbForm, vehicleNo: e.target.value })} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" />
+                  <input value={ewbForm.vehicleNo} onChange={(e) => setEwbForm({ ...ewbForm, vehicleNo: e.target.value })} aria-label="Vehicle Number" className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" />
                 </div>
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Distance (km)</label>
-                  <input type="number" value={ewbForm.transDistance} onChange={(e) => setEwbForm({ ...ewbForm, transDistance: e.target.value })} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" />
+                  <input type="number" value={ewbForm.transDistance} onChange={(e) => setEwbForm({ ...ewbForm, transDistance: e.target.value })} aria-label="Transport Distance in kilometers" className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">From Pincode</label>
-                  <input value={ewbForm.fromPincode} onChange={(e) => setEwbForm({ ...ewbForm, fromPincode: e.target.value })} maxLength={6} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" />
+                  <input value={ewbForm.fromPincode} onChange={(e) => setEwbForm({ ...ewbForm, fromPincode: e.target.value })} maxLength={6} aria-label="From Pincode" className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" />
                 </div>
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">To Pincode</label>
-                  <input value={ewbForm.toPincode} onChange={(e) => setEwbForm({ ...ewbForm, toPincode: e.target.value })} maxLength={6} className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" />
+                  <input value={ewbForm.toPincode} onChange={(e) => setEwbForm({ ...ewbForm, toPincode: e.target.value })} maxLength={6} aria-label="To Pincode" className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600" />
                 </div>
               </div>
             </div>
@@ -459,6 +481,7 @@ export default function EInvoicePage() {
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
                 placeholder="Enter cancellation reason..."
+                aria-label="Cancellation reason"
                 className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600"
               />
             </div>

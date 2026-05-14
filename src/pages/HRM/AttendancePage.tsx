@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { attendanceApi, employeeApi, AttendanceRecord, AttendanceSummary, Employee } from "../../api/hrm";
+import { PaginatedTable } from "../../components/table";
 
 const statusBg: Record<string, string> = {
   PRESENT: "bg-green-500", ABSENT: "bg-red-500", HALF_DAY: "bg-yellow-500",
@@ -90,11 +91,14 @@ export default function AttendancePage() {
               <label className="text-sm dark:text-gray-400">Date:</label>
               <input
                 type="date"
+                aria-label="Attendance date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 className="border rounded px-2 py-1 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
             </div>
+            <PaginatedTable data={records} pageSize={20}>
+              {(pageData) => (
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                 <tr>
@@ -104,7 +108,7 @@ export default function AttendancePage() {
                 </tr>
               </thead>
               <tbody className="divide-y dark:divide-gray-700">
-                {records.map((r) => (
+                {pageData.map((r) => (
                   <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-3 py-2">{r.employee?.empCode} — {r.employee?.firstName} {r.employee?.lastName}</td>
                     <td className="px-3 py-2">
@@ -119,6 +123,8 @@ export default function AttendancePage() {
                 )}
               </tbody>
             </table>
+              )}
+            </PaginatedTable>
           </div>
         )}
 
@@ -129,6 +135,7 @@ export default function AttendancePage() {
               <label className="text-sm dark:text-gray-400">Date:</label>
               <input
                 type="date"
+                aria-label="Bulk attendance date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 className="border rounded px-2 py-1 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -148,6 +155,7 @@ export default function AttendancePage() {
                     <td className="px-3 py-2">{emp.empCode} — {emp.firstName} {emp.lastName}</td>
                     <td className="px-3 py-2">
                       <select
+                        aria-label={`Status for ${emp.empCode}`}
                         value={bulkRows[i]?.status || "PRESENT"}
                         onChange={(e) => {
                           const copy = [...bulkRows];
@@ -164,6 +172,7 @@ export default function AttendancePage() {
                     <td className="px-3 py-2">
                       <input
                         type="number"
+                        aria-label={`OT hours for ${emp.empCode}`}
                         min="0"
                         step="0.5"
                         value={bulkRows[i]?.otHours || 0}
@@ -191,6 +200,7 @@ export default function AttendancePage() {
             <div className="flex gap-4 items-center mb-4">
               <label className="text-sm dark:text-gray-400">Month:</label>
               <select
+                aria-label="Summary month"
                 value={summaryMonth}
                 onChange={(e) => setSummaryMonth(Number(e.target.value))}
                 className="border rounded px-2 py-1 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -204,6 +214,7 @@ export default function AttendancePage() {
               <label className="text-sm dark:text-gray-400">Year:</label>
               <input
                 type="number"
+                aria-label="Summary year"
                 value={summaryYear}
                 onChange={(e) => setSummaryYear(Number(e.target.value))}
                 className="w-24 border rounded px-2 py-1 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"

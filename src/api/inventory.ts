@@ -128,3 +128,57 @@ export const returnApi = {
   confirm: (id: number) =>
     apiClient.post(`/inventory/returns/${id}/confirm`).then((r) => r.data.data),
 };
+
+// ── Roll API ──
+export const rollApi = {
+  list: (params?: Record<string, string | number | boolean | undefined>) =>
+    apiClient.get("/inventory/rolls", { params }).then((r) => r.data),
+  get: (id: number) =>
+    apiClient.get(`/inventory/rolls/${id}`).then((r) => r.data),
+  create: (data: Record<string, unknown>) =>
+    apiClient.post("/inventory/rolls", data).then((r) => r.data),
+  update: (id: number, data: Record<string, unknown>) =>
+    apiClient.put(`/inventory/rolls/${id}`, data).then((r) => r.data),
+  delete: (id: number) =>
+    apiClient.delete(`/inventory/rolls/${id}`),
+};
+
+// ── Stock Count API ──
+export const stockCountApi = {
+  list: (params?: Record<string, string | number | boolean | undefined>) =>
+    apiClient.get("/inventory/stock-counts", { params }).then((r) => r.data),
+  get: (id: number) =>
+    apiClient.get(`/inventory/stock-counts/${id}`).then((r) => r.data),
+  create: (data: Record<string, unknown>) =>
+    apiClient.post("/inventory/stock-counts", data).then((r) => r.data),
+  approve: (id: number) =>
+    apiClient.post(`/inventory/stock-counts/${id}/approve`).then((r) => r.data),
+  post: (id: number) =>
+    apiClient.post(`/inventory/stock-counts/${id}/post`).then((r) => r.data),
+};
+
+// ── Stock Adjustment API ──
+export const stockAdjustmentApi = {
+  list: (params?: Record<string, string | number | boolean | undefined>) =>
+    apiClient.get("/inventory/adjustments", { params }).then((r) => r.data),
+  get: (id: number) =>
+    apiClient.get(`/inventory/adjustments/${id}`).then((r) => r.data),
+  create: (data: Record<string, unknown>) =>
+    apiClient.post("/inventory/adjustments", data).then((r) => r.data),
+  approve: (id: number) =>
+    apiClient.post(`/inventory/adjustments/${id}/approve`).then((r) => r.data),
+  post: (id: number) =>
+    apiClient.post(`/inventory/adjustments/${id}/post`).then((r) => r.data),
+};
+
+// ── Stock Transfer API ──
+export const stockTransferApi = {
+  list: (params?: Record<string, string | number | boolean | undefined>) =>
+    apiClient.get("/inventory/transfers", { params }).then((r) => r.data),
+  get: (id: number) =>
+    apiClient.get(`/inventory/transfers/${id}`).then((r) => r.data),
+  create: (data: Record<string, unknown>) =>
+    apiClient.post("/inventory/transfers", data).then((r) => r.data),
+  confirm: (id: number) =>
+    apiClient.post(`/inventory/transfers/${id}/confirm`).then((r) => r.data),
+};

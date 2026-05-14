@@ -110,48 +110,48 @@ export interface SalarySlip {
 /* ─── APIs ─── */
 
 export const departmentApi = {
-  list: () => client.get('/hrm/departments'),
-  create: (d: Record<string, unknown>) => client.post('/hrm/departments', d),
+  list: () => client.get('/hrm/departments').then(r => r.data),
+  create: (d: Record<string, unknown>) => client.post('/hrm/departments', d).then(r => r.data),
 };
 
 export const designationApi = {
-  list: () => client.get('/hrm/designations'),
-  create: (d: Record<string, unknown>) => client.post('/hrm/designations', d),
+  list: () => client.get('/hrm/designations').then(r => r.data),
+  create: (d: Record<string, unknown>) => client.post('/hrm/designations', d).then(r => r.data),
 };
 
 export const employeeApi = {
-  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/employees', { params }),
-  getById: (id: number) => client.get(`/hrm/employees/${id}`),
-  create: (d: Record<string, unknown>) => client.post('/hrm/employees', d),
-  update: (id: number, d: Record<string, unknown>) => client.put(`/hrm/employees/${id}`, d),
-  terminate: (id: number, data: Record<string, unknown>) => client.patch(`/hrm/employees/${id}/terminate`, data),
+  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/employees', { params }).then(r => r.data),
+  getById: (id: number) => client.get(`/hrm/employees/${id}`).then(r => r.data),
+  create: (d: Record<string, unknown>) => client.post('/hrm/employees', d).then(r => r.data),
+  update: (id: number, d: Record<string, unknown>) => client.put(`/hrm/employees/${id}`, d).then(r => r.data),
+  terminate: (id: number, data: Record<string, unknown>) => client.patch(`/hrm/employees/${id}/terminate`, data).then(r => r.data),
 };
 
 export const attendanceApi = {
-  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/attendance', { params }),
-  mark: (d: Record<string, unknown>) => client.post('/hrm/attendance', d),
-  bulkMark: (d: Record<string, unknown>) => client.post('/hrm/attendance/bulk', d),
-  summary: (params: Record<string, string | number | boolean | undefined>) => client.get('/hrm/attendance/summary', { params }),
+  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/attendance', { params }).then(r => r.data),
+  mark: (d: Record<string, unknown>) => client.post('/hrm/attendance', d).then(r => r.data),
+  bulkMark: (d: Record<string, unknown>) => client.post('/hrm/attendance/bulk', d).then(r => r.data),
+  summary: (params: Record<string, string | number | boolean | undefined>) => client.get('/hrm/attendance/summary', { params }).then(r => r.data),
 };
 
 export const leaveApi = {
-  types: () => client.get('/hrm/leave-types'),
-  createType: (d: Record<string, unknown>) => client.post('/hrm/leave-types', d),
-  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/leaves', { params }),
-  apply: (d: Record<string, unknown>) => client.post('/hrm/leaves', d),
-  approve: (id: number) => client.patch(`/hrm/leaves/${id}/approve`),
-  reject: (id: number) => client.patch(`/hrm/leaves/${id}/reject`),
+  types: () => client.get('/hrm/leave-types').then(r => r.data),
+  createType: (d: Record<string, unknown>) => client.post('/hrm/leave-types', d).then(r => r.data),
+  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/leaves', { params }).then(r => r.data),
+  apply: (d: Record<string, unknown>) => client.post('/hrm/leaves', d).then(r => r.data),
+  approve: (id: number) => client.patch(`/hrm/leaves/${id}/approve`).then(r => r.data),
+  reject: (id: number) => client.patch(`/hrm/leaves/${id}/reject`).then(r => r.data),
 };
 
 export const salaryApi = {
-  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/salary-slips', { params }),
-  process: (month: number, year: number) => client.post('/hrm/salary/process', { month, year }),
-  markPaid: (month: number, year: number) => client.post('/hrm/salary/mark-paid', { month, year }),
+  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/salary-slips', { params }).then(r => r.data),
+  process: (month: number, year: number) => client.post('/hrm/salary/process', { month, year }).then(r => r.data),
+  markPaid: (month: number, year: number) => client.post('/hrm/salary/mark-paid', { month, year }).then(r => r.data),
 };
 
 export const loanApi = {
-  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/loans', { params }),
-  create: (d: Record<string, unknown>) => client.post('/hrm/loans', d),
+  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/loans', { params }).then(r => r.data),
+  create: (d: Record<string, unknown>) => client.post('/hrm/loans', d).then(r => r.data),
 };
 
 /* ─── Shift ─── */
@@ -169,12 +169,12 @@ export interface Shift {
 }
 
 export const shiftApi = {
-  list: () => client.get('/hrm/shifts'),
-  getById: (id: number) => client.get(`/hrm/shifts/${id}`),
-  create: (d: Record<string, unknown>) => client.post('/hrm/shifts', d),
-  update: (id: number, d: Record<string, unknown>) => client.put(`/hrm/shifts/${id}`, d),
-  delete: (id: number) => client.delete(`/hrm/shifts/${id}`),
-  assign: (d: { employeeId: number; shiftId: number | null }) => client.post('/hrm/shifts/assign', d),
+  list: () => client.get('/hrm/shifts').then(r => r.data),
+  getById: (id: number) => client.get(`/hrm/shifts/${id}`).then(r => r.data),
+  create: (d: Record<string, unknown>) => client.post('/hrm/shifts', d).then(r => r.data),
+  update: (id: number, d: Record<string, unknown>) => client.put(`/hrm/shifts/${id}`, d).then(r => r.data),
+  delete: (id: number) => client.delete(`/hrm/shifts/${id}`).then(r => r.data),
+  assign: (d: { employeeId: number; shiftId: number | null }) => client.post('/hrm/shifts/assign', d).then(r => r.data),
 };
 
 /* ─── Leave Balance ─── */
@@ -193,9 +193,9 @@ export interface LeaveBalance {
 }
 
 export const leaveBalanceApi = {
-  get: (params: { employeeId: number; year: number }) => client.get('/hrm/leave-balances', { params }),
-  allocate: (d: { employeeId: number; year: number }) => client.post('/hrm/leave-balances/allocate', d),
-  bulkAllocate: (d: { year: number }) => client.post('/hrm/leave-balances/bulk-allocate', d),
+  get: (params: { employeeId: number; year: number }) => client.get('/hrm/leave-balances', { params }).then(r => r.data),
+  allocate: (d: { employeeId: number; year: number }) => client.post('/hrm/leave-balances/allocate', d).then(r => r.data),
+  bulkAllocate: (d: { year: number }) => client.post('/hrm/leave-balances/bulk-allocate', d).then(r => r.data),
 };
 
 /* ─── FnF Settlement ─── */
@@ -219,11 +219,11 @@ export interface FnFSettlement {
 }
 
 export const fnfApi = {
-  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/fnf', { params }),
-  getByEmployee: (empId: number) => client.get(`/hrm/fnf/employee/${empId}`),
-  generate: (d: { employeeId: number }) => client.post('/hrm/fnf/generate', d),
-  approve: (id: number) => client.patch(`/hrm/fnf/${id}/approve`),
-  markPaid: (id: number) => client.patch(`/hrm/fnf/${id}/mark-paid`),
+  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/fnf', { params }).then(r => r.data),
+  getByEmployee: (empId: number) => client.get(`/hrm/fnf/employee/${empId}`).then(r => r.data),
+  generate: (d: { employeeId: number }) => client.post('/hrm/fnf/generate', d).then(r => r.data),
+  approve: (id: number) => client.patch(`/hrm/fnf/${id}/approve`).then(r => r.data),
+  markPaid: (id: number) => client.patch(`/hrm/fnf/${id}/mark-paid`).then(r => r.data),
 };
 
 /* ─── Statutory Exports ─── */
@@ -233,4 +233,96 @@ export const exportApi = {
   esiUrl: (month: number, year: number) => `/hrm/export/esi?month=${month}&year=${year}`,
   ecr: (params: { month: number; year: number }) => client.get('/hrm/export/ecr', { params, responseType: 'blob' }),
   esi: (params: { month: number; year: number }) => client.get('/hrm/export/esi', { params, responseType: 'blob' }),
+};
+
+/* ─── Holiday Calendar ─── */
+
+export const holidayApi = {
+  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/holidays', { params }).then(r => r.data),
+  get: (id: number) => client.get(`/hrm/holidays/${id}`).then(r => r.data),
+  create: (d: Record<string, unknown>) => client.post('/hrm/holidays', d).then(r => r.data),
+  update: (id: number, d: Record<string, unknown>) => client.put(`/hrm/holidays/${id}`, d).then(r => r.data),
+  delete: (id: number) => client.delete(`/hrm/holidays/${id}`).then(r => r.data),
+};
+
+/* ─── Overtime ─── */
+
+export const overtimeApi = {
+  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/overtime', { params }).then(r => r.data),
+  get: (id: number) => client.get(`/hrm/overtime/${id}`).then(r => r.data),
+  create: (d: Record<string, unknown>) => client.post('/hrm/overtime', d).then(r => r.data),
+  bulkCreate: (d: Record<string, unknown>) => client.post('/hrm/overtime/bulk', d).then(r => r.data),
+  approve: (id: number) => client.patch(`/hrm/overtime/${id}/approve`).then(r => r.data),
+  reject: (id: number) => client.patch(`/hrm/overtime/${id}/reject`).then(r => r.data),
+  summary: (params: Record<string, string | number | boolean | undefined>) => client.get('/hrm/overtime/summary', { params }).then(r => r.data),
+};
+
+/* ─── Overtime Rules ─── */
+
+export const overtimeRuleApi = {
+  list: () => client.get('/hrm/overtime-rules').then(r => r.data),
+  get: (id: number) => client.get(`/hrm/overtime-rules/${id}`).then(r => r.data),
+  create: (d: Record<string, unknown>) => client.post('/hrm/overtime-rules', d).then(r => r.data),
+  update: (id: number, d: Record<string, unknown>) => client.put(`/hrm/overtime-rules/${id}`, d).then(r => r.data),
+  delete: (id: number) => client.delete(`/hrm/overtime-rules/${id}`).then(r => r.data),
+};
+
+/* ─── Salary Components ─── */
+
+export const salaryComponentApi = {
+  list: () => client.get('/hrm/salary-components').then(r => r.data),
+  get: (id: number) => client.get(`/hrm/salary-components/${id}`).then(r => r.data),
+  create: (d: Record<string, unknown>) => client.post('/hrm/salary-components', d).then(r => r.data),
+  update: (id: number, d: Record<string, unknown>) => client.put(`/hrm/salary-components/${id}`, d).then(r => r.data),
+};
+
+/* ─── Piece-Rate Cards ─── */
+
+export const pieceRateApi = {
+  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/piece-rates', { params }).then(r => r.data),
+  get: (id: number) => client.get(`/hrm/piece-rates/${id}`).then(r => r.data),
+  create: (d: Record<string, unknown>) => client.post('/hrm/piece-rates', d).then(r => r.data),
+  update: (id: number, d: Record<string, unknown>) => client.patch(`/hrm/piece-rates/${id}`, d).then(r => r.data),
+};
+
+/* ─── Operator Production ─── */
+
+export const operatorProductionApi = {
+  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/operator-production', { params }).then(r => r.data),
+  record: (d: Record<string, unknown>) => client.post('/hrm/operator-production', d).then(r => r.data),
+  earnings: (params: Record<string, string | number | boolean | undefined>) => client.get('/hrm/operator-production/earnings', { params }).then(r => r.data),
+};
+
+/* ─── PT Slabs ─── */
+
+export const ptSlabApi = {
+  list: () => client.get('/hrm/pt-slabs').then(r => r.data),
+  get: (id: number) => client.get(`/hrm/pt-slabs/${id}`).then(r => r.data),
+  create: (d: Record<string, unknown>) => client.post('/hrm/pt-slabs', d).then(r => r.data),
+  update: (id: number, d: Record<string, unknown>) => client.put(`/hrm/pt-slabs/${id}`, d).then(r => r.data),
+};
+
+/* ─── PF Returns ─── */
+
+export const pfReturnApi = {
+  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/pf-returns', { params }).then(r => r.data),
+  get: (id: number) => client.get(`/hrm/pf-returns/${id}`).then(r => r.data),
+  create: (d: Record<string, unknown>) => client.post('/hrm/pf-returns', d).then(r => r.data),
+  update: (id: number, d: Record<string, unknown>) => client.put(`/hrm/pf-returns/${id}`, d).then(r => r.data),
+};
+
+/* ─── ESI Returns ─── */
+
+export const esiReturnApi = {
+  list: (params?: Record<string, string | number | boolean | undefined>) => client.get('/hrm/esi-returns', { params }).then(r => r.data),
+  get: (id: number) => client.get(`/hrm/esi-returns/${id}`).then(r => r.data),
+  create: (d: Record<string, unknown>) => client.post('/hrm/esi-returns', d).then(r => r.data),
+  update: (id: number, d: Record<string, unknown>) => client.put(`/hrm/esi-returns/${id}`, d).then(r => r.data),
+};
+
+/* ─── HRM Reports ─── */
+
+export const hrmReportApi = {
+  wageRegister: (params: Record<string, string | number | boolean | undefined>) => client.get('/hrm/reports/wage-register', { params }).then(r => r.data),
+  form16: (employeeId: number) => client.get(`/hrm/reports/form16/${employeeId}`).then(r => r.data),
 };

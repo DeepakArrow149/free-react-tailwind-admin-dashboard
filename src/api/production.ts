@@ -114,25 +114,125 @@ export const fgTransferApi = {
 };
 
 // ── Operation API ──
+export interface OperationMaster {
+  id: number;
+  code: string;
+  name: string;
+  department: string;
+  machineTypeId: number | null;
+  machineType: { id: number; code: string; name: string; category: string | null } | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const operationApi = {
   list: (params?: Record<string, unknown>) => apiClient.get('/production/operations', { params }).then(r => r.data),
+  getById: (id: number) => apiClient.get(`/production/operations/${id}`).then(r => r.data),
   create: (data: Record<string, unknown>) => apiClient.post('/production/operations', data).then(r => r.data),
+  update: (id: number, data: Record<string, unknown>) => apiClient.put(`/production/operations/${id}`, data).then(r => r.data),
+  delete: (id: number) => apiClient.delete(`/production/operations/${id}`).then(r => r.data),
 };
 
 // ── Bulletin API ──
+export interface BulletinDetail {
+  id: number;
+  bulletinNo: string;
+  styleId: number;
+  orderId?: number;
+  totalSam: number;
+  targetPcsPerHour: number;
+  manpower: number;
+  machines: number;
+  status: string;
+  remarks?: string;
+  style?: { id: number; styleNo: string; styleName: string };
+  items?: Array<{
+    id: number;
+    operationId: number;
+    seqNo: number;
+    machineType?: string;
+    machineTypeId?: number;
+    sam: number;
+    attachments?: string;
+    remarks?: string;
+    operation?: { id: number; code: string; name: string };
+  }>;
+  createdAt: string;
+}
+
+export interface BulletinSummary {
+  id: number;
+  bulletinNo: string;
+  status: string;
+  orderId?: number;
+  totalSam: number;
+  targetPcsPerHour: number;
+  createdAt: string;
+}
+
+export interface GenerateBulletinInput {
+  styleId: number;
+  orderId?: number;
+  manpower?: number;
+  machines?: number;
+  targetEfficiency?: number;
+  remarks?: string;
+}
+
 export const bulletinApi = {
   list: (params?: Record<string, unknown>) => apiClient.get('/production/bulletins', { params }).then(r => r.data),
   getById: (id: number) => apiClient.get(`/production/bulletins/${id}`).then(r => r.data),
   create: (data: Record<string, unknown>) => apiClient.post('/production/bulletins', data).then(r => r.data),
   update: (id: number, data: Record<string, unknown>) => apiClient.put(`/production/bulletins/${id}`, data).then(r => r.data),
   approve: (id: number) => apiClient.patch(`/production/bulletins/${id}/approve`).then(r => r.data),
+  generateFromStyle: (data: GenerateBulletinInput) =>
+    apiClient.post<{ data: BulletinDetail }>('/production/bulletins/generate-from-style', data).then(r => r.data),
+  getByStyle: (styleId: number) =>
+    apiClient.get<{ data: BulletinSummary[] }>(`/production/bulletins/by-style/${styleId}`).then(r => r.data),
 };
 
 // ── Production Order API ──
+export interface ProductionOrderDetail {
+  id: number;
+  poNo: string;
+  orderId: number;
+  order?: { id: number; orderNo: string; totalQty?: number };
+  lineNo?: string;
+  lineId?: number;
+  bulletinId?: number;
+  lineBalancingId?: number;
+  capacityLine?: { id: number; lineName: string; department: string };
+  bulletin?: { id: number; bulletinNo: string; totalSam: number; style?: { styleNo: string } };
+  balancing?: { id: number; name: string; balanceEfficiency: number; status: string };
+  samPerPiece?: number;
+  targetEfficiency?: number;
+  plannedOperators?: number;
+  taktTimeSec?: number;
+  startDate?: string;
+  endDate?: string;
+  totalQty?: number;
+  completedQty?: number;
+  type?: string;
+  status: string;
+  remarks?: string;
+}
+
+export interface CreatePOFromBalancingInput {
+  lineBalancingId: number;
+  startDate: string;
+  endDate: string;
+  totalQty?: number;
+  priority?: string;
+  remarks?: string;
+}
+
 export const productionOrderApi = {
   list: (params?: Record<string, unknown>) => apiClient.get('/production/orders', { params }).then(r => r.data),
   getById: (id: number) => apiClient.get(`/production/orders/${id}`).then(r => r.data),
   create: (data: Record<string, unknown>) => apiClient.post('/production/orders', data).then(r => r.data),
+  createFromBalancing: (data: CreatePOFromBalancingInput) =>
+    apiClient.post<{ data: ProductionOrderDetail }>('/production/orders/from-balancing', data).then(r => r.data),
   update: (id: number, data: Record<string, unknown>) => apiClient.put(`/production/orders/${id}`, data).then(r => r.data),
   start: (id: number) => apiClient.patch(`/production/orders/${id}/start`).then(r => r.data),
   complete: (id: number) => apiClient.patch(`/production/orders/${id}/complete`).then(r => r.data),

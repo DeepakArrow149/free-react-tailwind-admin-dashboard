@@ -66,10 +66,44 @@ export interface StyleMaster {
   styleNo: string;
   styleName: string;
   buyerId: number;
+  department?: string | null;
+  garmentType?: string | null;
+  description?: string | null;
+  productionType?: string | null;
+  totalSam?: number;
+  totalOperations?: number;
   buyer?: { id: number; name: string; code: string };
   season?: { id: number; name: string; code: string } | null;
   category?: { id: number; name: string } | null;
+  styleOperations?: StyleOperation[];
   createdAt: string;
+}
+
+export interface StyleOperation {
+  id: number;
+  styleId: number;
+  operationId: number;
+  sequence: number;
+  machineTypeId: number | null;
+  sam: number;
+  targetPerHour: number;
+  noOfMachines: number;
+  noOfOperators: number;
+  department: string | null;
+  remarks: string | null;
+  operation: { id: number; code: string; name: string; department: string | null };
+  machineType: { id: number; code: string; name: string; category: string | null } | null;
+}
+
+export interface StyleOperationInput {
+  operationId: number;
+  sequence: number;
+  machineTypeId?: number | null;
+  sam: number;
+  noOfMachines: number;
+  noOfOperators: number;
+  department?: string | null;
+  remarks?: string | null;
 }
 
 export interface Color {
@@ -210,6 +244,12 @@ export const masterApi = {
   updateStyle: (id: number, data: Partial<StyleMaster>) => api.patch<SingleResponse<StyleMaster>>(`/master/styles/${id}`, data),
   deleteStyle: (id: number) => api.delete(`/master/styles/${id}`),
 
+  // Style Operations (OB Breakdown)
+  getStyleOperations: (styleId: number) => api.get<SingleResponse<StyleOperation[]>>(`/master/styles/${styleId}/operations`),
+  saveStyleOperations: (styleId: number, operations: StyleOperationInput[]) =>
+    api.put<SingleResponse<StyleOperation[]>>(`/master/styles/${styleId}/operations`, { operations }),
+  deleteStyleOperation: (styleId: number, id: number) => api.delete(`/master/styles/${styleId}/operations/${id}`),
+
   // Lookups
   listColors: () => api.get<SingleResponse<Color[]>>('/master/colors'),
   createColor: (data: Partial<Color>) => api.post('/master/colors', data),
@@ -219,6 +259,10 @@ export const masterApi = {
   createCategory: (data: Partial<Category>) => api.post('/master/categories', data),
   listCurrencies: () => api.get('/master/currencies'),
   listUnits: () => api.get('/master/units'),
+  getUnit: (id: number) => api.get(`/master/units/${id}`),
+  createUnit: (data: Record<string, unknown>) => api.post('/master/units', data),
+  updateUnit: (id: number, data: Record<string, unknown>) => api.patch(`/master/units/${id}`, data),
+  deleteUnit: (id: number) => api.delete(`/master/units/${id}`),
   listMaterialCategories: () => api.get<SingleResponse<MaterialCategory[]>>('/master/material-categories'),
 
   // Companies
@@ -252,4 +296,84 @@ export const masterApi = {
   listCounts: () => api.get<SingleResponse<CountMaster[]>>('/master/counts'),
   createCount: (data: Partial<CountMaster>) => api.post('/master/counts', data),
   listMerchants: () => api.get<SingleResponse<Merchant[]>>('/master/merchants'),
+
+  // Approved Vendors
+  listApprovedVendors: (params?: ListParams) => api.get('/master/approved-vendors', { params }),
+  getApprovedVendor: (id: number) => api.get(`/master/approved-vendors/${id}`),
+  createApprovedVendor: (data: Record<string, unknown>) => api.post('/master/approved-vendors', data),
+  updateApprovedVendor: (id: number, data: Record<string, unknown>) => api.patch(`/master/approved-vendors/${id}`, data),
+  deleteApprovedVendor: (id: number) => api.delete(`/master/approved-vendors/${id}`),
+
+  // HSN Codes
+  listHsnCodes: (params?: ListParams) => api.get('/master/hs-codes', { params }),
+  getHsnCode: (id: number) => api.get(`/master/hs-codes/${id}`),
+  createHsnCode: (data: Record<string, unknown>) => api.post('/master/hs-codes', data),
+  updateHsnCode: (id: number, data: Record<string, unknown>) => api.put(`/master/hs-codes/${id}`, data),
+
+  // States
+  listStates: (params?: ListParams) => api.get('/master/states', { params }),
+  createState: (data: Record<string, unknown>) => api.post('/master/states', data),
+  updateState: (id: number, data: Record<string, unknown>) => api.put(`/master/states/${id}`, data),
+
+  // Bank Accounts
+  listBankAccounts: (params?: ListParams) => api.get('/master/bank-accounts', { params }),
+  getBankAccount: (id: number) => api.get(`/master/bank-accounts/${id}`),
+  createBankAccount: (data: Record<string, unknown>) => api.post('/master/bank-accounts', data),
+  updateBankAccount: (id: number, data: Record<string, unknown>) => api.patch(`/master/bank-accounts/${id}`, data),
+  deleteBankAccount: (id: number) => api.delete(`/master/bank-accounts/${id}`),
+
+  // Material Category (create)
+  createMaterialCategory: (data: Record<string, unknown>) => api.post('/master/material-categories', data),
+
+  // Size Groups
+  listSizeGroups: () => api.get('/master/size-groups'),
+  getSizeGroup: (id: number) => api.get(`/master/size-groups/${id}`),
+  createSizeGroup: (data: Record<string, unknown>) => api.post('/master/size-groups', data),
+  updateSizeGroup: (id: number, data: Record<string, unknown>) => api.patch(`/master/size-groups/${id}`, data),
+  deleteSizeGroup: (id: number) => api.delete(`/master/size-groups/${id}`),
+
+  // HSN delete
+  deleteHsnCode: (id: number) => api.delete(`/master/hs-codes/${id}`),
+
+  // State delete
+  deleteState: (id: number) => api.delete(`/master/states/${id}`),
+};
+
+// ── Lookup API (LookupCategory table) ──
+export interface LookupItem {
+  id: number;
+  category: string;
+  code: string;
+  name: string;
+  description: string | null;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+export const lookupApi = {
+  listCategories: () => api.get<SingleResponse<string[]>>('/lookups/categories'),
+  listByCategory: (category: string) => api.get<SingleResponse<LookupItem[]>>(`/lookups/by-category/${category}`),
+  list: (params?: { category?: string; isActive?: boolean }) => api.get<SingleResponse<LookupItem[]>>('/lookups', { params }),
+  create: (data: Partial<LookupItem>) => api.post('/lookups', data),
+  update: (id: number, data: Partial<LookupItem>) => api.patch(`/lookups/${id}`, data),
+  delete: (id: number) => api.delete(`/lookups/${id}`),
+};
+
+// ── Defect Code API ──
+export interface DefectCode {
+  id: number;
+  code: string;
+  name: string;
+  category: 'CRITICAL' | 'MAJOR' | 'MINOR';
+  department: string | null;
+  operationId: number | null;
+  isActive: boolean;
+}
+
+export const defectCodeApi = {
+  list: (params?: { category?: string; isActive?: boolean }) => api.get<SingleResponse<DefectCode[]>>('/defect-codes', { params }),
+  getById: (id: number) => api.get<SingleResponse<DefectCode>>(`/defect-codes/${id}`),
+  create: (data: Partial<DefectCode>) => api.post('/defect-codes', data),
+  update: (id: number, data: Partial<DefectCode>) => api.patch(`/defect-codes/${id}`, data),
+  delete: (id: number) => api.delete(`/defect-codes/${id}`),
 };

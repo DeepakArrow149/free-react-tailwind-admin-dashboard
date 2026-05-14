@@ -261,3 +261,35 @@ export const extendedReportApi = {
   cashFlow: (from: string, to: string) => client.get('/finance/reports/cash-flow', { params: { from, to } }).then(r => r.data),
   fundFlow: (from: string, to: string) => client.get('/finance/reports/fund-flow', { params: { from, to } }).then(r => r.data),
 };
+
+// ── E-Invoice API ──
+export const eInvoiceApi = {
+  list: (params?: Record<string, unknown>) => client.get('/finance/e-invoices', { params }).then(r => r.data),
+  get: (id: number) => client.get(`/finance/e-invoices/${id}`).then(r => r.data),
+  generate: (data: Record<string, unknown>) => client.post('/finance/e-invoices/generate', data).then(r => r.data),
+  cancel: (id: number, data?: Record<string, unknown>) => client.patch(`/finance/e-invoices/${id}/cancel`, data).then(r => r.data),
+};
+
+// ── E-Way Bill API ──
+export const ewayBillApi = {
+  list: (params?: Record<string, unknown>) => client.get('/finance/eway-bills', { params }).then(r => r.data),
+  generate: (data: Record<string, unknown>) => client.post('/finance/eway-bills/generate', data).then(r => r.data),
+  cancel: (id: number, data?: Record<string, unknown>) => client.patch(`/finance/eway-bills/${id}/cancel`, data).then(r => r.data),
+  updateTransport: (id: number, data: Record<string, unknown>) => client.patch(`/finance/eway-bills/${id}/transport`, data).then(r => r.data),
+};
+
+// ── TDS Section API ──
+export const tdsSectionApi = {
+  list: () => client.get('/finance/tds-sections').then(r => r.data),
+  get: (code: string) => client.get(`/finance/tds-sections/${code}`).then(r => r.data),
+};
+
+// ── General Ledger API ──
+export const generalLedgerApi = {
+  query: (params: Record<string, unknown>) => client.get('/finance/general-ledger', { params }).then(r => r.data),
+};
+
+// ── Bank Statement Import API ──
+export const bankStatementApi = {
+  import: (data: FormData) => client.post('/finance/bank-statement/import', data, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
+};

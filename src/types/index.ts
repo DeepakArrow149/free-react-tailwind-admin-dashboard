@@ -5,6 +5,26 @@
  * Module-specific types should live in their respective module directories.
  */
 
+// ─── Re-exports from shared-types ────────────────────────────
+export {
+  type OrderStatus, ORDER_STATUSES,
+  type OrderType, ORDER_TYPES,
+  type PoStatus, PO_STATUSES,
+  type ProductionStatus, PRODUCTION_STATUSES,
+  type ShipmentStatus, SHIPMENT_STATUSES,
+  type UserStatus, USER_STATUSES,
+  type CompanyStatus, COMPANY_STATUSES,
+  type ApprovalModule, APPROVAL_MODULES,
+  type SystemRole, SYSTEM_ROLES,
+  type SubscriptionPlan, SUBSCRIPTION_PLANS,
+  type SubscriptionStatus, SUBSCRIPTION_STATUSES,
+  type ShipMode, SHIP_MODES,
+  type Incoterm, INCOTERMS,
+  type PaginationParams,
+  type ApiResponse as SharedApiResponse,
+  type PaginatedResponse as SharedPaginatedResponse,
+} from '@erp/shared-types';
+
 // ─── Common Entity Types ─────────────────────────────────────
 
 export interface BaseEntity {
@@ -20,7 +40,7 @@ export interface User extends BaseEntity {
   email: string;
   avatar?: string;
   roles: string[];
-  status: 'active' | 'inactive' | 'suspended';
+  status: UserStatus;
 }
 
 export interface UserProfile extends User {
@@ -33,10 +53,11 @@ export interface UserProfile extends User {
 
 // ─── API Response Types ──────────────────────────────────────
 
-export interface ApiResponse<T> {
+export interface ApiResponse<T = unknown> {
   data: T;
   message?: string;
   success: boolean;
+  meta?: { page: number; limit: number; total: number; totalPages: number };
 }
 
 export interface PaginatedResponse<T> {

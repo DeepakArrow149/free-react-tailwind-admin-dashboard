@@ -58,7 +58,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 function ToastContainer({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: string) => void }) {
   return (
-    <div className="fixed bottom-4 right-4 z-999999 flex flex-col gap-2">
+    <div className="fixed bottom-4 right-4 z-80 flex flex-col gap-2">
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} onDismiss={onDismiss} />
       ))}
@@ -89,7 +89,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
       <p className="flex-1 text-sm font-medium">{toast.message}</p>
       <button
         onClick={() => onDismiss(toast.id)}
-        className="flex-shrink-0 rounded p-0.5 hover:opacity-70"
+        className="shrink-0 rounded p-0.5 hover:opacity-70"
         aria-label="Dismiss"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

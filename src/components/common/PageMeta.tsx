@@ -27,3 +27,5 @@ export function PageMeta({ title, description }: PageMetaProps) {
 export function AppMetaProvider({ children }: { children: React.ReactNode }) {
   return <HelmetProvider>{children}</HelmetProvider>;
 }
+
+export default PageMeta;

@@ -25,3 +25,5 @@ export function Label({ children, required, className, ...props }: LabelProps) {
     </label>
   );
 }
+
+export default Label;

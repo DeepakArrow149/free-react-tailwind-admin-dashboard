@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { productionOrderApi } from "../../api/production";
 import { toastSuccess, toastError } from "../../utils/toast";
 import PageMeta from "../../components/common/PageMeta";
+import { Pagination } from "../../components/table";
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
@@ -13,6 +14,16 @@ interface ProdOrder {
   order?: { orderNo: string };
   orderId: number;
   lineNo?: string;
+  lineId?: number;
+  bulletinId?: number;
+  lineBalancingId?: number;
+  capacityLine?: { id: number; lineName: string; department: string };
+  bulletin?: { id: number; bulletinNo: string; totalSam: number; style?: { styleNo: string } };
+  balancing?: { id: number; name: string; balanceEfficiency: number; status: string };
+  samPerPiece?: number;
+  targetEfficiency?: number;
+  plannedOperators?: number;
+  taktTimeSec?: number;
   startDate?: string;
   endDate?: string;
   totalQty?: number;
@@ -75,6 +86,7 @@ export default function ProductionOrderPage() {
         {/* Filters */}
         <div className="flex flex-wrap gap-3">
           <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
+            aria-label="Filter by status"
             className="border rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
             <option value="">All Statuses</option>
             {Object.keys(statusColors).map(s => <option key={s} value={s}>{s}</option>)}
@@ -90,7 +102,7 @@ export default function ProductionOrderPage() {
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  {["PO No", "Order No", "Line", "Start", "End", "Total Qty", "Completed", "Type", "Status", "Actions"].map(h => (
+                  {["PO No", "Order No", "Line", "Bulletin", "Efficiency", "Start", "End", "Total Qty", "Completed", "Status", "Actions"].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{h}</th>
                   ))}
                 </tr>
@@ -100,12 +112,13 @@ export default function ProductionOrderPage() {
                   <tr key={po.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{po.poNo}</td>
                     <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{po.order?.orderNo ?? po.orderId}</td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{po.lineNo ?? "—"}</td>
+                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{po.capacityLine?.lineName ?? po.lineNo ?? "—"}</td>
+                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{po.bulletin?.bulletinNo ?? "—"}</td>
+                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{po.balancing ? `${Number(po.balancing.balanceEfficiency).toFixed(1)}%` : "—"}</td>
                     <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{po.startDate ? fmtDate(po.startDate) : "—"}</td>
                     <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{po.endDate ? fmtDate(po.endDate) : "—"}</td>
                     <td className="px-4 py-3 text-right text-gray-700 dark:text-gray-300">{po.totalQty?.toLocaleString() ?? "—"}</td>
                     <td className="px-4 py-3 text-right text-gray-700 dark:text-gray-300">{po.completedQty?.toLocaleString() ?? 0}</td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{po.type ?? "—"}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[po.status] ?? statusColors.DRAFT}`}>{po.status}</span>
                     </td>
@@ -123,7 +136,7 @@ export default function ProductionOrderPage() {
                   </tr>
                 ))}
                 {orders.length === 0 && (
-                  <tr><td colSpan={10} className="px-4 py-6 text-center text-gray-400">No production orders found</td></tr>
+                  <tr><td colSpan={11} className="px-4 py-6 text-center text-gray-400">No production orders found</td></tr>
                 )}
               </tbody>
             </table>
@@ -131,13 +144,15 @@ export default function ProductionOrderPage() {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center gap-2 pt-2">
-            <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-600 dark:text-gray-300">Prev</button>
-            <span className="px-3 py-1 text-sm text-gray-600 dark:text-gray-400">Page {page} / {totalPages}</span>
-            <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-600 dark:text-gray-300">Next</button>
-          </div>
-        )}
+        <div className="mt-2 pt-2">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(p) => setPage(p)}
+            totalItems={total}
+            pageSize={20}
+          />
+        </div>
       </div>
     </>
   );

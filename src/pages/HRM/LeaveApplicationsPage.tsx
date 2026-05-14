@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { leaveApi, LeaveApplication, LeaveType, employeeApi, Employee } from "../../api/hrm";
 import { toastSuccess, toastError } from "../../utils/toast";
 import PageMeta from "../../components/common/PageMeta";
+import { PaginatedTable } from "../../components/table";
 
 function fmtDate(iso?: string) {
   if (!iso) return "—";
@@ -28,7 +29,7 @@ export default function LeaveApplicationsPage() {
       const [lr, ltr, er] = await Promise.all([leaveApi.list(), leaveApi.types(), employeeApi.list()]);
       setLeaves(lr.data?.data ?? []);
       setLeaveTypes(ltr.data?.data ?? ltr.data ?? []);
-      const empList = er.data?.data?.data || er.data?.data || [];
+      const empList = er.data?.data || [];
       setEmployees(Array.isArray(empList) ? empList : []);
     } catch { setLeaves([]); }
     setLoading(false);
@@ -124,6 +125,8 @@ export default function LeaveApplicationsPage() {
         )}
 
         {loading ? <p className="text-gray-400 py-8 text-center">Loading…</p> : (
+          <PaginatedTable data={leaves} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700">
@@ -134,7 +137,7 @@ export default function LeaveApplicationsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {leaves.map((l) => {
+                {pageData.map((l) => {
                   const meta = statusMeta[l.status] ?? statusMeta.PENDING;
                   return (
                     <tr key={l.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
@@ -145,7 +148,7 @@ export default function LeaveApplicationsPage() {
                       <td className="px-3 py-3 text-gray-600 dark:text-gray-400">{fmtDate(l.fromDate)}</td>
                       <td className="px-3 py-3 text-gray-600 dark:text-gray-400">{fmtDate(l.toDate)}</td>
                       <td className="px-3 py-3 text-center text-gray-700 dark:text-gray-300">{l.totalDays}</td>
-                      <td className="px-3 py-3 text-xs text-gray-500 dark:text-gray-400 max-w-[150px] truncate">{l.reason}</td>
+                      <td className="px-3 py-3 text-xs text-gray-500 dark:text-gray-400 max-w-37.5 truncate">{l.reason}</td>
                       <td className="px-3 py-3">
                         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${meta.bg} ${meta.text}`}>{meta.label}</span>
                       </td>
@@ -168,6 +171,8 @@ export default function LeaveApplicationsPage() {
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
         )}
       </div>
     </>

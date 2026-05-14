@@ -12,6 +12,8 @@ import {
   DebitNote,
   ArAgingRow,
 } from "../../api/finance";
+import { PaginatedTable } from "../../components/table";
+import { downloadPdf } from "../../utils/downloadPdf";
 
 const tabs = ["Sales Invoices", "Receipts", "Credit Notes", "Debit Notes", "AR Aging"] as const;
 type Tab = (typeof tabs)[number];
@@ -60,19 +62,19 @@ export default function InvoicesPage() {
 
   async function loadInvoices() {
     const r = await salesInvoiceApi.list();
-    setInvoices(r.data?.data?.data || []);
+    setInvoices(r.data?.data || []);
   }
   async function loadReceipts() {
     const r = await paymentReceiptApi.list();
-    setReceipts(r.data?.data?.data || []);
+    setReceipts(r.data?.data || []);
   }
   async function loadCreditNotes() {
     const r = await creditNoteApi.list();
-    setCreditNotes(r.data?.data?.data || []);
+    setCreditNotes(r.data?.data || []);
   }
   async function loadDebitNotes() {
     const r = await debitNoteApi.list();
-    setDebitNotes(r.data?.data?.data || []);
+    setDebitNotes(r.data?.data || []);
   }
   async function loadArAging() {
     const r = await financeReportApi.arAging();
@@ -217,6 +219,8 @@ export default function InvoicesPage() {
               </form>
             )}
 
+            <PaginatedTable data={invoices} pageSize={20}>
+              {(pageData) => (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
@@ -227,7 +231,7 @@ export default function InvoicesPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y dark:divide-gray-700">
-                  {invoices.map((inv) => (
+                  {pageData.map((inv) => (
                     <tr key={inv.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                       <td className="px-3 py-2 font-mono">{inv.invoiceNo}</td>
                       <td className="px-3 py-2">{inv.buyer?.name}</td>
@@ -242,14 +246,17 @@ export default function InvoicesPage() {
                         </span>
                       </td>
                       <td className="px-3 py-2">
-                        {inv.status === "DRAFT" && (
-                          <button
-                            onClick={() => handleSubmitInvoice(inv.id)}
-                            className="text-blue-600 hover:underline text-xs"
-                          >
-                            Submit
-                          </button>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => downloadPdf('sales-invoice', inv.id)} className="text-purple-600 hover:underline text-xs">PDF</button>
+                          {inv.status === "DRAFT" && (
+                            <button
+                              onClick={() => handleSubmitInvoice(inv.id)}
+                              className="text-blue-600 hover:underline text-xs"
+                            >
+                              Submit
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -261,11 +268,15 @@ export default function InvoicesPage() {
                 </tbody>
               </table>
             </div>
+              )}
+            </PaginatedTable>
           </div>
         )}
 
         {/* ═══ Receipts ═══ */}
         {tab === "Receipts" && (
+          <PaginatedTable data={receipts} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
@@ -276,7 +287,7 @@ export default function InvoicesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y dark:divide-gray-700">
-                {receipts.map((r) => (
+                {pageData.map((r) => (
                   <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-3 py-2 font-mono">{r.receiptNo}</td>
                     <td className="px-3 py-2">{r.buyer?.name}</td>
@@ -304,10 +315,14 @@ export default function InvoicesPage() {
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
         )}
 
         {/* ═══ Credit Notes ═══ */}
         {tab === "Credit Notes" && (
+          <PaginatedTable data={creditNotes} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
@@ -318,7 +333,7 @@ export default function InvoicesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y dark:divide-gray-700">
-                {creditNotes.map((cn) => (
+                {pageData.map((cn) => (
                   <tr key={cn.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-3 py-2 font-mono">{cn.cnNo}</td>
                     <td className="px-3 py-2">{cn.buyer?.name}</td>
@@ -340,10 +355,14 @@ export default function InvoicesPage() {
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
         )}
 
         {/* ═══ Debit Notes ═══ */}
         {tab === "Debit Notes" && (
+          <PaginatedTable data={debitNotes} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
@@ -354,7 +373,7 @@ export default function InvoicesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y dark:divide-gray-700">
-                {debitNotes.map((dn) => (
+                {pageData.map((dn) => (
                   <tr key={dn.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-3 py-2 font-mono">{dn.dnNo}</td>
                     <td className="px-3 py-2">{dn.supplier?.name}</td>
@@ -376,6 +395,8 @@ export default function InvoicesPage() {
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
         )}
 
         {/* ═══ AR Aging ═══ */}
@@ -397,6 +418,8 @@ export default function InvoicesPage() {
               })}
             </div>
 
+            <PaginatedTable data={arAging} pageSize={20}>
+              {(pageData) => (
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                 <tr>
@@ -406,7 +429,7 @@ export default function InvoicesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y dark:divide-gray-700">
-                {arAging.map((r, i) => (
+                {pageData.map((r, i) => (
                   <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-3 py-2 font-mono">{r.invoiceNo}</td>
                     <td className="px-3 py-2">{r.buyer?.name}</td>
@@ -427,6 +450,8 @@ export default function InvoicesPage() {
                 )}
               </tbody>
             </table>
+              )}
+            </PaginatedTable>
           </div>
         )}
       </div>

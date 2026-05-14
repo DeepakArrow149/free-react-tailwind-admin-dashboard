@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { masterApi, type Color } from "../../../api/master";
 import PageMeta from "../../../components/common/PageMeta";
+import { PaginatedTable } from "@/components/table";
 
 export default function ColorList() {
   const [colors, setColors] = useState<Color[]>([]);
@@ -140,7 +141,9 @@ export default function ColorList() {
             <p className="text-sm">No colors added yet</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <PaginatedTable data={colors} pageSize={20}>
+            {(pageData) => (
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
@@ -151,7 +154,7 @@ export default function ColorList() {
                 </tr>
               </thead>
               <tbody>
-                {colors.map((c) => (
+                {pageData.map((c) => (
                   <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/2">
                     <td className="py-3 px-4 font-medium text-gray-800 dark:text-white/90">{c.colorCode}</td>
                     <td className="py-3 px-4 text-gray-600 dark:text-gray-300">{c.colorName}</td>
@@ -169,6 +172,8 @@ export default function ColorList() {
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
         )}
       </div>
     </>

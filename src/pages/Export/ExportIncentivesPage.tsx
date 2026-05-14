@@ -11,7 +11,7 @@ export default function ExportIncentivesPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    try { const { data } = await incentiveApi.list(); setItems(data.data); } catch { toast.error('Failed to load incentives'); }
+    try { const { data } = await incentiveApi.list(); setItems(data.data || []); } catch { toast.error('Failed to load incentives'); }
     setLoading(false);
   }, []);
 

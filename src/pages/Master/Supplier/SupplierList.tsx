@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router";
 import { masterApi, type Supplier, type ListParams } from "../../../api/master";
 import PageMeta from "../../../components/common/PageMeta";
+import { Pagination } from "@/components/table";
+import TableSkeleton from '@/components/common/TableSkeleton';
 
 export default function SupplierList() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -59,6 +61,7 @@ export default function SupplierList() {
           </div>
         </div>
 
+        {loading ? <TableSkeleton rows={5} cols={7} /> : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -73,9 +76,7 @@ export default function SupplierList() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
-              ) : suppliers.length === 0 ? (
+              {suppliers.length === 0 ? (
                 <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">No suppliers found</td></tr>
               ) : (
                 suppliers.map((s) => (
@@ -106,18 +107,17 @@ export default function SupplierList() {
             </tbody>
           </table>
         </div>
-
-        {meta.totalPages > 1 && (
-          <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-100 dark:border-gray-800">
-            <p className="text-sm text-gray-500">Page {meta.page} of {meta.totalPages}</p>
-            <div className="flex gap-2">
-              <button disabled={meta.page <= 1} onClick={() => fetchSuppliers({ page: meta.page - 1 })}
-                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-50 dark:border-gray-700 dark:text-gray-300">Previous</button>
-              <button disabled={meta.page >= meta.totalPages} onClick={() => fetchSuppliers({ page: meta.page + 1 })}
-                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-50 dark:border-gray-700 dark:text-gray-300">Next</button>
-            </div>
-          </div>
         )}
+
+        <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-800">
+          <Pagination
+            currentPage={meta.page}
+            totalPages={meta.totalPages}
+            onPageChange={(p) => fetchSuppliers({ page: p })}
+            totalItems={meta.total}
+            pageSize={meta.limit}
+          />
+        </div>
       </div>
     </>
   );

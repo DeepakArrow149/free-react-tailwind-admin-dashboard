@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { productionUpdateApi, type ProductionUpdateEntry, type DashboardRow } from "../../api/production";
 import PageMeta from "../../components/common/PageMeta";
+import { Pagination } from "../../components/table";
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
@@ -180,15 +181,13 @@ export default function SewingFinishingPage() {
               </table>
             </div>}
 
-            {entryTotalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 pt-2">
-                <button disabled={entryPage <= 1} onClick={() => setEntryPage((p) => p - 1)}
-                  className="px-3 py-1 rounded border text-sm disabled:opacity-40 dark:border-gray-600 dark:text-gray-300">Prev</button>
-                <span className="text-sm text-gray-600 dark:text-gray-400">Page {entryPage} of {entryTotalPages}</span>
-                <button disabled={entryPage >= entryTotalPages} onClick={() => setEntryPage((p) => p + 1)}
-                  className="px-3 py-1 rounded border text-sm disabled:opacity-40 dark:border-gray-600 dark:text-gray-300">Next</button>
-              </div>
-            )}
+            <Pagination
+              currentPage={entryPage}
+              totalPages={entryTotalPages}
+              onPageChange={(p) => setEntryPage(p)}
+              totalItems={entryTotal}
+              pageSize={50}
+            />
           </div>
         )}
 

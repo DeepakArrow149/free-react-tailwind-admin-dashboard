@@ -5,10 +5,12 @@ import PageMeta from "../../../components/common/PageMeta";
 import Label from "../../../components/form/Label";
 import Input from "../../../components/form/input/InputField";
 import Button from "../../../components/ui/button/Button";
+import { useSupplierTypes } from '@/hooks/useMasterLookups';
 
-const SUPPLIER_TYPES = ["FABRIC", "TRIM", "ACCESSORY", "SUBCONTRACTOR", "LOGISTICS"];
+const _SUPPLIER_DEFAULTS = ["FABRIC", "TRIM", "ACCESSORY", "SUBCONTRACTOR", "LOGISTICS"];
 
 export default function SupplierForm() {
+  const { data: SUPPLIER_TYPES = _SUPPLIER_DEFAULTS } = useSupplierTypes();
   const { id } = useParams();
   const isEdit = id && id !== "new";
   const navigate = useNavigate();
@@ -98,6 +100,7 @@ export default function SupplierForm() {
               <select
                 value={form.supplierType}
                 onChange={(e) => handleChange("supplierType", e.target.value)}
+                aria-label="Supplier type"
                 className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
               >
                 {SUPPLIER_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}

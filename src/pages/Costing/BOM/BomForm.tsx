@@ -8,12 +8,13 @@ import {
 } from "../../../api/costing";
 import api from "../../../api/client";
 import PageMeta from "../../../components/common/PageMeta";
+import { useMaterialTypes } from '@/hooks/useMasterLookups';
 
 interface StyleOption { id: number; styleNo: string; styleName: string }
 interface MaterialOption { id: number; materialCode: string; materialName: string }
 interface SupplierOption { id: number; code: string; name: string }
 
-const MATERIAL_TYPES = [
+const _BOM_MAT_DEFAULTS = [
   "SHELL_FABRIC", "LINING", "INTERLINING", "TRIM", "ACCESSORY", "PACKING", "THREAD",
 ];
 const UNITS = ["MTR", "KG", "PCS", "DOZ", "SET", "ROLL", "YRD"];
@@ -42,6 +43,7 @@ function calcItemCost(item: BomItemInput) {
 }
 
 export default function BomForm() {
+  const { data: MATERIAL_TYPES = _BOM_MAT_DEFAULTS } = useMaterialTypes();
   const { id } = useParams();
   const isEdit = !!id;
   const navigate = useNavigate();
@@ -212,6 +214,8 @@ export default function BomForm() {
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Style *</label>
               <select
+                aria-label="Style"
+                title="Style"
                 value={styleId}
                 onChange={(e) => setStyleId(Number(e.target.value))}
                 disabled={isEdit}
@@ -271,6 +275,8 @@ export default function BomForm() {
                       <td className="px-3 py-2 text-gray-400">{index + 1}</td>
                       <td className="px-3 py-2">
                         <select
+                          aria-label="Material type"
+                          title="Material type"
                           value={item.materialType}
                           onChange={(e) => updateItem(index, "materialType", e.target.value)}
                           disabled={!isDraft}
@@ -290,6 +296,8 @@ export default function BomForm() {
                       </td>
                       <td className="px-3 py-2">
                         <select
+                          aria-label="Material"
+                          title="Material"
                           value={item.materialId ?? ""}
                           onChange={(e) => updateItem(index, "materialId", e.target.value ? Number(e.target.value) : null)}
                           disabled={!isDraft}
@@ -301,6 +309,8 @@ export default function BomForm() {
                       </td>
                       <td className="px-3 py-2">
                         <select
+                          aria-label="Supplier"
+                          title="Supplier"
                           value={item.supplierId ?? ""}
                           onChange={(e) => updateItem(index, "supplierId", e.target.value ? Number(e.target.value) : null)}
                           disabled={!isDraft}
@@ -312,6 +322,8 @@ export default function BomForm() {
                       </td>
                       <td className="px-3 py-2">
                         <select
+                          aria-label="Unit"
+                          title="Unit"
                           value={item.unit}
                           onChange={(e) => updateItem(index, "unit", e.target.value)}
                           disabled={!isDraft}
@@ -322,6 +334,8 @@ export default function BomForm() {
                       </td>
                       <td className="px-3 py-2">
                         <input
+                          aria-label="Consumption per piece"
+                          title="Consumption per piece"
                           type="number"
                           step="0.0001"
                           min="0"
@@ -333,6 +347,8 @@ export default function BomForm() {
                       </td>
                       <td className="px-3 py-2">
                         <input
+                          aria-label="Wastage percent"
+                          title="Wastage percent"
                           type="number"
                           step="0.01"
                           min="0"
@@ -345,6 +361,8 @@ export default function BomForm() {
                       </td>
                       <td className="px-3 py-2">
                         <input
+                          aria-label="Unit price"
+                          title="Unit price"
                           type="number"
                           step="0.01"
                           min="0"
@@ -359,7 +377,7 @@ export default function BomForm() {
                       </td>
                       <td className="px-3 py-2">
                         {isDraft && items.length > 1 && (
-                          <button onClick={() => removeItem(index)} className="text-red-400 hover:text-red-600">
+                          <button type="button" onClick={() => removeItem(index)} title="Remove row" aria-label="Remove row" className="text-red-400 hover:text-red-600">
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                           </button>
                         )}

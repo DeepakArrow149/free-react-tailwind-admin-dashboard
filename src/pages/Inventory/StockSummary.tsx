@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { stockApi, warehouseApi, type StockSummaryRow, type StockLedgerEntry, type Warehouse } from "../../api/inventory";
 import PageMeta from "../../components/common/PageMeta";
+import { PaginatedTable } from "../../components/table";
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
@@ -50,7 +51,7 @@ export default function StockSummary() {
     setLoadingL(false);
   }, [ledgerPage, ledgerWh]);
 
-  useEffect(() => { warehouseApi.list().then(setWarehouses).catch(() => {}); }, []);
+  useEffect(() => { warehouseApi.list().then(setWarehouses).catch((err) => console.error('Failed to load warehouses:', err)); }, []);
   useEffect(() => { fetchSummary(); }, [fetchSummary]);
   useEffect(() => { if (tab === "ledger") fetchLedger(); }, [tab, fetchLedger]);
 
@@ -88,11 +89,13 @@ export default function StockSummary() {
                 placeholder="Search material…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                aria-label="Search material"
                 className="px-3 py-2 border rounded-lg text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white w-64"
               />
               <select
                 value={whFilter}
                 onChange={(e) => setWhFilter(e.target.value)}
+                aria-label="Filter by warehouse"
                 className="px-3 py-2 border rounded-lg text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               >
                 <option value="">All Warehouses</option>
@@ -107,6 +110,8 @@ export default function StockSummary() {
             ) : summary.length === 0 ? (
               <div className="text-center py-10 text-gray-500">No stock data found</div>
             ) : (
+              <PaginatedTable data={summary} pageSize={20}>
+                {(pageData) => (
               <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
                 <table className="min-w-full text-sm">
                   <thead className="bg-gray-50 dark:bg-gray-800">
@@ -117,7 +122,7 @@ export default function StockSummary() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {summary.map((r, i) => (
+                    {pageData.map((r, i) => (
                       <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                         <td className="px-4 py-2 font-mono text-xs">{r.materialCode}</td>
                         <td className="px-4 py-2">{r.materialName}</td>
@@ -133,6 +138,8 @@ export default function StockSummary() {
                   </tbody>
                 </table>
               </div>
+                )}
+              </PaginatedTable>
             )}
           </div>
         )}
@@ -144,6 +151,7 @@ export default function StockSummary() {
               <select
                 value={ledgerWh}
                 onChange={(e) => { setLedgerWh(e.target.value); setLedgerPage(1); }}
+                aria-label="Filter by warehouse"
                 className="px-3 py-2 border rounded-lg text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               >
                 <option value="">All Warehouses</option>

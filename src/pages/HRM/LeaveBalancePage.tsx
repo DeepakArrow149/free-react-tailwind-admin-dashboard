@@ -66,15 +66,15 @@ export default function LeaveBalancePage() {
         <div className="flex items-end gap-4 flex-wrap">
           <div>
             <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Employee</label>
-            <select value={selectedEmpId} onChange={(e) => setSelectedEmpId(e.target.value)}
-              className="rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white min-w-[220px]">
+            <select aria-label="Employee" value={selectedEmpId} onChange={(e) => setSelectedEmpId(e.target.value)}
+              className="rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white min-w-55">
               <option value="">Select employee…</option>
               {employees.map((e) => <option key={e.id} value={e.id}>{e.empCode} — {e.firstName} {e.lastName}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Year</label>
-            <input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} min={2020} max={2099}
+            <input type="number" aria-label="Year" value={year} onChange={(e) => setYear(Number(e.target.value))} min={2020} max={2099}
               className="w-24 rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white" />
           </div>
           {selectedEmpId && (

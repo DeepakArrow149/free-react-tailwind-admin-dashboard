@@ -5,6 +5,7 @@ import { excelExportApi } from "../../../api/export";
 import { toastError } from "../../../utils/toast";
 import PageMeta from "../../../components/common/PageMeta";
 import TableSkeleton from "../../../components/common/TableSkeleton";
+import { Pagination } from "@/components/table";
 
 export default function MaterialList() {
   const [materials, setMaterials] = useState<Material[]>([]);
@@ -96,17 +97,15 @@ export default function MaterialList() {
           </table>
         </div>
 
-        {meta.totalPages > 1 && (
-          <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-100 dark:border-gray-800">
-            <p className="text-sm text-gray-500">Page {meta.page} of {meta.totalPages}</p>
-            <div className="flex gap-2">
-              <button disabled={meta.page <= 1} onClick={() => fetchMaterials({ page: meta.page - 1 })}
-                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-50 dark:border-gray-700 dark:text-gray-300">Previous</button>
-              <button disabled={meta.page >= meta.totalPages} onClick={() => fetchMaterials({ page: meta.page + 1 })}
-                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-50 dark:border-gray-700 dark:text-gray-300">Next</button>
-            </div>
-          </div>
-        )}
+        <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-800">
+          <Pagination
+            currentPage={meta.page}
+            totalPages={meta.totalPages}
+            onPageChange={(p) => fetchMaterials({ page: p })}
+            totalItems={meta.total}
+            pageSize={meta.limit}
+          />
+        </div>
       </div>
     </>
   );

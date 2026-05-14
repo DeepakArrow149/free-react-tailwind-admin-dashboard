@@ -118,8 +118,8 @@ export default function ExcelImportPage() {
       const res = await client.post("/admin/import/preview", { model: selectedModel, rows: mappedRows });
       setPreview(res.data.data);
       setStep("preview");
-    } catch (e: any) {
-      toast.error(e.response?.data?.message || "Preview failed");
+    } catch (e: unknown) {
+      toast.error((e as Record<string, Record<string, Record<string, string>>>)?.response?.data?.message || "Preview failed");
     }
     setLoading(false);
   };
@@ -145,8 +145,8 @@ export default function ExcelImportPage() {
       setImportResult(res.data.data);
       setStep("done");
       toast.success("Import completed!");
-    } catch (e: any) {
-      toast.error(e.response?.data?.message || "Import failed");
+    } catch (e: unknown) {
+      toast.error((e as Record<string, Record<string, Record<string, string>>>)?.response?.data?.message || "Import failed");
     }
     setLoading(false);
   };
@@ -154,7 +154,7 @@ export default function ExcelImportPage() {
   const modelObj = models.find((m) => m.key === selectedModel);
 
   return (
-    <div className="p-6 max-w-[1100px] mx-auto">
+    <div className="p-6 max-w-275 mx-auto">
       <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Excel / CSV Import</h1>
 
       {/* Step indicator */}

@@ -10,6 +10,7 @@ import {
   JournalEntry,
   TrialBalanceRow,
 } from "../../api/finance";
+import { PaginatedTable } from "../../components/table";
 
 const tabs = ["Receipts", "Payments Out", "Journal Entries", "Trial Balance"] as const;
 type Tab = (typeof tabs)[number];
@@ -63,15 +64,15 @@ export default function PaymentsPage() {
 
   async function loadReceipts() {
     const r = await paymentReceiptApi.list();
-    setReceipts(r.data?.data?.data || []);
+    setReceipts(r.data?.data || []);
   }
   async function loadPayOuts() {
     const r = await paymentOutApi.list();
-    setPaymentOuts(r.data?.data?.data || []);
+    setPaymentOuts(r.data?.data || []);
   }
   async function loadJournals() {
     const r = await journalEntryApi.list();
-    setJournals(r.data?.data?.data || []);
+    setJournals(r.data?.data || []);
   }
   async function loadTrialBalance() {
     const r = await financeReportApi.trialBalance();
@@ -202,6 +203,8 @@ export default function PaymentsPage() {
               </form>
             )}
 
+            <PaginatedTable data={receipts} pageSize={20}>
+              {(pageData) => (
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                 <tr>
@@ -211,7 +214,7 @@ export default function PaymentsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y dark:divide-gray-700">
-                {receipts.map((r) => (
+                {pageData.map((r) => (
                   <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-3 py-2 font-mono">{r.receiptNo}</td>
                     <td className="px-3 py-2">{r.buyer?.name}</td>
@@ -232,6 +235,8 @@ export default function PaymentsPage() {
                 )}
               </tbody>
             </table>
+              )}
+            </PaginatedTable>
           </div>
         )}
 
@@ -291,6 +296,8 @@ export default function PaymentsPage() {
               </form>
             )}
 
+            <PaginatedTable data={paymentOuts} pageSize={20}>
+              {(pageData) => (
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                 <tr>
@@ -300,7 +307,7 @@ export default function PaymentsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y dark:divide-gray-700">
-                {paymentOuts.map((p) => (
+                {pageData.map((p) => (
                   <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-3 py-2 font-mono">{p.paymentNo}</td>
                     <td className="px-3 py-2">{p.supplier?.name}</td>
@@ -320,11 +327,15 @@ export default function PaymentsPage() {
                 )}
               </tbody>
             </table>
+              )}
+            </PaginatedTable>
           </div>
         )}
 
         {/* ═══ Journal Entries ═══ */}
         {tab === "Journal Entries" && (
+          <PaginatedTable data={journals} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
@@ -335,7 +346,7 @@ export default function PaymentsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y dark:divide-gray-700">
-                {journals.map((j) => (
+                {pageData.map((j) => (
                   <tr key={j.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-3 py-2 font-mono">{j.jeNo}</td>
                     <td className="px-3 py-2">{j.jeDate?.split("T")[0]}</td>
@@ -362,11 +373,15 @@ export default function PaymentsPage() {
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
         )}
 
         {/* ═══ Trial Balance ═══ */}
         {tab === "Trial Balance" && (
           <div>
+            <PaginatedTable data={trialBalance} pageSize={20}>
+              {(pageData) => (
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                 <tr>
@@ -376,7 +391,7 @@ export default function PaymentsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y dark:divide-gray-700">
-                {trialBalance.map((r, i) => (
+                {pageData.map((r, i) => (
                   <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-3 py-2 font-mono">{r.accountCode}</td>
                     <td className="px-3 py-2">{r.accountName}</td>
@@ -409,6 +424,8 @@ export default function PaymentsPage() {
                 </tfoot>
               )}
             </table>
+              )}
+            </PaginatedTable>
           </div>
         )}
       </div>

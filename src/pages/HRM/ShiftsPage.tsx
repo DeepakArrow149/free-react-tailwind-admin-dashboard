@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { shiftApi, Shift } from "../../api/hrm";
 import { toastSuccess, toastError } from "../../utils/toast";
 import PageMeta from "../../components/common/PageMeta";
+import { PaginatedTable } from "../../components/table";
 
 export default function ShiftsPage() {
   const [rows, setRows] = useState<Shift[]>([]);
@@ -106,6 +107,8 @@ export default function ShiftsPage() {
         )}
 
         {loading ? <p className="text-gray-400 py-8 text-center">Loading…</p> : (
+          <PaginatedTable data={rows} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700">
@@ -116,7 +119,7 @@ export default function ShiftsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {rows.map((s) => (
+                {pageData.map((s) => (
                   <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <td className="px-3 py-3 font-medium text-gray-900 dark:text-white">{s.code}</td>
                     <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{s.name}</td>
@@ -134,12 +137,14 @@ export default function ShiftsPage() {
                     </td>
                   </tr>
                 ))}
-                {rows.length === 0 && (
+                {pageData.length === 0 && (
                   <tr><td colSpan={9} className="px-4 py-8 text-center text-gray-400">No shifts</td></tr>
                 )}
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
         )}
       </div>
     </>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import PageMeta from '../../components/common/PageMeta';
+import { Pagination } from '../../components/table';
 import { containerApi, ContainerStuffing } from '../../api/packing';
 
 const MAX_CBM: Record<string, number> = { '20FT': 28, '40FT': 58, '40HQ': 68 };
@@ -34,8 +35,8 @@ export default function ContainerStuffingPage() {
 
   const load = async () => {
     const res = await containerApi.list({ page, limit: 20 });
-    setItems(res.data.data.data);
-    setTotalPages(res.data.data.totalPages);
+    setItems(res.data.data || []);
+    setTotalPages(res.data.meta?.totalPages ?? 1);
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -71,18 +72,18 @@ export default function ContainerStuffingPage() {
           <div className="mb-6 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-3">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div><label className="block text-xs text-gray-500 mb-1">Container Size*</label>
-                <select className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.containerSize} onChange={e => setForm({ ...form, containerSize: e.target.value })}>
+                <select aria-label="Container Size" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.containerSize} onChange={e => setForm({ ...form, containerSize: e.target.value })}>
                   <option value="20FT">20FT (~28 CBM)</option><option value="40FT">40FT (~58 CBM)</option><option value="40HQ">40HQ (~68 CBM)</option>
                 </select>
               </div>
-              <div><label className="block text-xs text-gray-500 mb-1">Container No</label><input className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.containerNo ?? ''} onChange={e => setForm({ ...form, containerNo: e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">Seal No</label><input className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.sealNo ?? ''} onChange={e => setForm({ ...form, sealNo: e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">Stuffing Date</label><input type="date" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.stuffingDate ?? ''} onChange={e => setForm({ ...form, stuffingDate: e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Container No</label><input aria-label="Container No" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.containerNo ?? ''} onChange={e => setForm({ ...form, containerNo: e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Seal No</label><input aria-label="Seal No" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.sealNo ?? ''} onChange={e => setForm({ ...form, sealNo: e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Stuffing Date</label><input type="date" aria-label="Stuffing Date" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.stuffingDate ?? ''} onChange={e => setForm({ ...form, stuffingDate: e.target.value })} /></div>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div><label className="block text-xs text-gray-500 mb-1">Vehicle No</label><input className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.vehicleNo ?? ''} onChange={e => setForm({ ...form, vehicleNo: e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">Total Cartons</label><input type="number" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.totalCartons} onChange={e => setForm({ ...form, totalCartons: +e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">Total CBM</label><input type="number" step="0.01" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.totalCbm} onChange={e => setForm({ ...form, totalCbm: +e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Vehicle No</label><input aria-label="Vehicle No" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.vehicleNo ?? ''} onChange={e => setForm({ ...form, vehicleNo: e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Total Cartons</label><input type="number" aria-label="Total Cartons" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.totalCartons} onChange={e => setForm({ ...form, totalCartons: +e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Total CBM</label><input type="number" step="0.01" aria-label="Total CBM" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.totalCbm} onChange={e => setForm({ ...form, totalCbm: +e.target.value })} /></div>
             </div>
 
             {/* Utilization Bar */}
@@ -96,7 +97,7 @@ export default function ContainerStuffingPage() {
               </div>
             </div>
 
-            <div><label className="block text-xs text-gray-500 mb-1">Remarks</label><textarea className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" rows={2} value={form.remarks ?? ''} onChange={e => setForm({ ...form, remarks: e.target.value })} /></div>
+            <div><label className="block text-xs text-gray-500 mb-1">Remarks</label><textarea aria-label="Remarks" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" rows={2} value={form.remarks ?? ''} onChange={e => setForm({ ...form, remarks: e.target.value })} /></div>
             <button onClick={handleCreate} className="px-5 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">Create</button>
           </div>
         )}
@@ -127,10 +128,13 @@ export default function ContainerStuffingPage() {
             </tbody>
           </table>
         </div>
-        <div className="flex justify-between items-center mt-3">
-          <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-700">Prev</button>
-          <span className="text-sm text-gray-500">Page {page}/{totalPages}</span>
-          <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-700">Next</button>
+        <div className="mt-3">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(p) => setPage(p)}
+            pageSize={20}
+          />
         </div>
       </div>
     </>

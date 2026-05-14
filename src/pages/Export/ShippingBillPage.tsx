@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { shippingBillApi } from '../../api/export';
 import type { ShippingBill } from '../../api/export';
 import { toast } from 'sonner';
+import { PaginatedTable } from '../../components/table';
 
 const STATUS_FLOW = ['DRAFT', 'FILED', 'LET_EXPORT', 'COMPLETED'];
 
@@ -15,7 +16,7 @@ export default function ShippingBillPage() {
     setLoading(true);
     try {
       const { data } = await shippingBillApi.list();
-      setItems(data.data);
+      setItems(data.data || []);
     } catch { toast.error('Failed to load shipping bills'); }
     setLoading(false);
   }, []);
@@ -34,7 +35,7 @@ export default function ShippingBillPage() {
 
   const updateStatus = async (id: number, status: string) => {
     try {
-      await shippingBillApi.updateStatus(id, status);
+      await shippingBillApi.updateStatus(id, { status });
       toast.success(`Status updated to ${status}`);
       load();
     } catch { toast.error('Failed to update status'); }
@@ -74,6 +75,13 @@ export default function ShippingBillPage() {
       )}
 
       {/* Table */}
+      {loading ? (
+        <p className="text-center py-8 text-gray-400">Loading…</p>
+      ) : items.length === 0 ? (
+        <p className="text-center py-8 text-gray-400">No shipping bills found</p>
+      ) : (
+      <PaginatedTable data={items} pageSize={20}>
+        {(pageData) => (
       <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-50 dark:bg-gray-700">
@@ -84,12 +92,7 @@ export default function ShippingBillPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {loading ? (
-              <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-400">Loading…</td></tr>
-            ) : items.length === 0 ? (
-              <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-400">No shipping bills found</td></tr>
-            ) : (
-              items.map((sb) => {
+              {pageData.map((sb) => {
                 const nextStatus = STATUS_FLOW[STATUS_FLOW.indexOf(sb.status) + 1];
                 return (
                   <tr key={sb.id} className="hover:bg-gray-50 dark:hover:bg-gray-750">
@@ -111,11 +114,13 @@ export default function ShippingBillPage() {
                     </td>
                   </tr>
                 );
-              })
-            )}
+              })}
           </tbody>
         </table>
       </div>
+        )}
+      </PaginatedTable>
+      )}
     </div>
   );
 }

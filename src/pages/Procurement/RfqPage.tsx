@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { rfqApi, RfqHeader } from "../../api/procurement";
 import { toastSuccess, toastError } from "../../utils/toast";
 import PageMeta from "../../components/common/PageMeta";
+import { PaginatedTable } from "../../components/table";
 
 /* ── helpers ── */
 function fmtDate(iso?: string) {
@@ -168,6 +169,8 @@ export default function RfqPage() {
         {loading ? (
           <p className="text-gray-400 py-8 text-center">Loading…</p>
         ) : (
+          <PaginatedTable data={rfqs} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700">
@@ -178,7 +181,7 @@ export default function RfqPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {rfqs.map((r) => {
+                {pageData.map((r) => {
                   const meta = statusMeta[r.status] ?? statusMeta.DRAFT;
                   return (
                     <>
@@ -186,7 +189,7 @@ export default function RfqPage() {
                         <td className="px-3 py-3 font-medium text-gray-900 dark:text-white">{r.rfqNo ?? `#${r.id}`}</td>
                         <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{r.order?.orderNo ?? (r.orderId ? `#${r.orderId}` : "—")}</td>
                         <td className="px-3 py-3 text-xs text-gray-600 dark:text-gray-400">{r.materialType ?? "—"}</td>
-                        <td className="px-3 py-3 text-xs text-gray-600 dark:text-gray-400 max-w-[200px] truncate">{r.description ?? "—"}</td>
+                        <td className="px-3 py-3 text-xs text-gray-600 dark:text-gray-400 max-w-50 truncate">{r.description ?? "—"}</td>
                         <td className="px-3 py-3 text-xs text-gray-500 dark:text-gray-400">{fmtDate(r.requiredDate)}</td>
                         <td className="px-3 py-3 text-xs text-gray-600 dark:text-gray-400">{r.rfqSuppliers?.length ?? 0}</td>
                         <td className="px-3 py-3">
@@ -243,12 +246,14 @@ export default function RfqPage() {
                     </>
                   );
                 })}
-                {rfqs.length === 0 && (
+                {pageData.length === 0 && (
                   <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-400">No RFQs found</td></tr>
                 )}
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
         )}
       </div>
     </>

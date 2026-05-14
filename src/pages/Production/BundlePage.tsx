@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { bundleApi } from "../../api/production";
 import { toastSuccess, toastError } from "../../utils/toast";
 import PageMeta from "../../components/common/PageMeta";
+import { Pagination } from "../../components/table";
 
 interface BundleRecord {
   id: number;
@@ -168,13 +169,15 @@ export default function BundlePage() {
           </div>
         )}
 
-        {totalPages > 1 && (
-          <div className="flex justify-center gap-2 pt-2">
-            <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-600 dark:text-gray-300">Prev</button>
-            <span className="px-3 py-1 text-sm text-gray-600 dark:text-gray-400">Page {page} / {totalPages}</span>
-            <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-600 dark:text-gray-300">Next</button>
-          </div>
-        )}
+        <div className="mt-2 pt-2">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(p) => setPage(p)}
+            totalItems={total}
+            pageSize={20}
+          />
+        </div>
       </div>
     </>
   );

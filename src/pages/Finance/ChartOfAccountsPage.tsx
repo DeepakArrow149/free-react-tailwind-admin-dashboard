@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { accountApi, ChartOfAccount } from "../../api/finance";
 import { toastSuccess, toastError } from "../../utils/toast";
 import PageMeta from "../../components/common/PageMeta";
+import { PaginatedTable } from "../../components/table";
 
 const typeColors: Record<string, string> = {
   ASSET:     "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400",
@@ -221,6 +222,8 @@ export default function ChartOfAccountsPage() {
         {loading ? (
           <p className="text-gray-400 py-8 text-center">Loading…</p>
         ) : (
+          <PaginatedTable data={filteredAccounts} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700">
@@ -233,7 +236,7 @@ export default function ChartOfAccountsPage() {
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {view === "tree" ? (
                   treeData.length > 0 ? treeData.map((node) => <TreeNode key={node.id} node={node} />) : (
-                    filteredAccounts.map((a) => {
+                    pageData.map((a) => {
                       const color = typeColors[a.accountType] ?? "";
                       return (
                         <tr key={a.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
@@ -248,7 +251,7 @@ export default function ChartOfAccountsPage() {
                     })
                   )
                 ) : (
-                  filteredAccounts.map((a) => {
+                  pageData.map((a) => {
                     const color = typeColors[a.accountType] ?? "";
                     return (
                       <tr key={a.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
@@ -268,6 +271,8 @@ export default function ChartOfAccountsPage() {
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
         )}
       </div>
     </>

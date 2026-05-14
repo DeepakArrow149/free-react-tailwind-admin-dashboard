@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { salaryApi, leaveApi, SalarySlip, LeaveApplication } from "../../api/hrm";
+import { PaginatedTable } from "../../components/table";
 
 const leaveBg: Record<string, string> = {
   PENDING: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
@@ -84,6 +85,7 @@ export default function PayrollPage() {
             <div className="flex gap-4 items-center mb-4 flex-wrap">
               <label className="text-sm dark:text-gray-400">Month:</label>
               <select
+                aria-label="Payroll month"
                 value={month}
                 onChange={(e) => setMonth(Number(e.target.value))}
                 className="border rounded px-2 py-1 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -97,6 +99,7 @@ export default function PayrollPage() {
               <label className="text-sm dark:text-gray-400">Year:</label>
               <input
                 type="number"
+                aria-label="Payroll year"
                 value={year}
                 onChange={(e) => setYear(Number(e.target.value))}
                 className="w-24 border rounded px-2 py-1 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -124,6 +127,8 @@ export default function PayrollPage() {
               ))}
             </div>
 
+            <PaginatedTable data={slips} pageSize={20}>
+              {(pageData) => (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
@@ -134,7 +139,7 @@ export default function PayrollPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y dark:divide-gray-700">
-                  {slips.map((s) => (
+                  {pageData.map((s) => (
                     <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                       <td className="px-2 py-2 font-mono text-xs">{s.slipNo}</td>
                       <td className="px-2 py-2">{s.employee?.empCode} — {s.employee?.firstName}</td>
@@ -170,12 +175,16 @@ export default function PayrollPage() {
                 </tbody>
               </table>
             </div>
+              )}
+            </PaginatedTable>
           </div>
         )}
 
         {/* ---------- LEAVE APPLICATIONS ---------- */}
         {tab === "leaves" && (
           <div>
+            <PaginatedTable data={leaves} pageSize={20}>
+              {(pageData) => (
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                 <tr>
@@ -185,7 +194,7 @@ export default function PayrollPage() {
                 </tr>
               </thead>
               <tbody className="divide-y dark:divide-gray-700">
-                {leaves.map((l) => (
+                {pageData.map((l) => (
                   <tr key={l.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-3 py-2">{l.employee?.empCode} — {l.employee?.firstName}</td>
                     <td className="px-3 py-2">{l.leaveType?.name}</td>
@@ -215,6 +224,8 @@ export default function PayrollPage() {
                 )}
               </tbody>
             </table>
+              )}
+            </PaginatedTable>
           </div>
         )}
       </div>

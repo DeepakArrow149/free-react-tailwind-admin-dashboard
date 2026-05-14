@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { labTestApi, LabTestRequest } from "../../api/quality";
 import { toastSuccess, toastError } from "../../utils/toast";
 import PageMeta from "../../components/common/PageMeta";
+import { PaginatedTable } from "../../components/table";
 
 /* ── helpers ── */
 function fmtDate(iso?: string) {
@@ -81,7 +82,7 @@ export default function LabTestPage() {
         {/* filter */}
         <div className="flex gap-2">
           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-            className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white">
+            aria-label="Status filter" className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white">
             <option value="">All Statuses</option>
             {Object.entries(statusMeta).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
           </select>
@@ -96,30 +97,30 @@ export default function LabTestPage() {
                 <div>
                   <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Order ID</label>
                   <input type="number" value={form.orderId} onChange={(e) => setForm({ ...form, orderId: e.target.value })}
-                    className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white" />
+                    aria-label="Order ID" className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Test Type</label>
                   <select value={form.testType} onChange={(e) => setForm({ ...form, testType: e.target.value })}
-                    className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white">
+                    aria-label="Test Type" className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white">
                     {testTypes.map((t) => <option key={t} value={t}>{t.replace(/_/g, " ")}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Lab Name</label>
                   <input type="text" value={form.labName} onChange={(e) => setForm({ ...form, labName: e.target.value })}
-                    className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white" />
+                    aria-label="Lab Name" className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Expected Date</label>
                   <input type="date" value={form.expectedDate} onChange={(e) => setForm({ ...form, expectedDate: e.target.value })}
-                    className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white" />
+                    aria-label="Expected Date" className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white" />
                 </div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Remarks</label>
                 <textarea value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} rows={2}
-                  className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white" />
+                  aria-label="Remarks" className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white" />
               </div>
               <div className="flex justify-end gap-2">
                 <button onClick={() => setShowCreate(false)} className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">Cancel</button>
@@ -134,6 +135,8 @@ export default function LabTestPage() {
         {loading ? (
           <p className="text-gray-400 py-8 text-center">Loading…</p>
         ) : (
+          <PaginatedTable data={tests} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700">
@@ -144,7 +147,7 @@ export default function LabTestPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {tests.map((t) => {
+                {pageData.map((t) => {
                   const meta = statusMeta[t.status] ?? statusMeta.PENDING;
                   const isExpanded = expandedId === t.id;
                   return (
@@ -204,6 +207,8 @@ export default function LabTestPage() {
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
         )}
       </div>
     </>

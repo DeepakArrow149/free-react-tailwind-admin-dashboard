@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { hourlyApi } from "../../api/production";
+import { toast } from "sonner";
 import PageMeta from "../../components/common/PageMeta";
 
 interface HourlyEntry {
@@ -67,8 +68,8 @@ export default function HourlyProductionPage() {
       });
       setForm({ hour: "08:00", target: "", actual: "", defects: "0", remarks: "" });
       fetchData();
-      toastSuccess("Entry saved");
-    } catch (e) { toastError(e, "Failed to save entry"); }
+      toast.success("Entry saved");
+    } catch { toast.error("Failed to save entry"); }
     setSaving(false);
   };
 

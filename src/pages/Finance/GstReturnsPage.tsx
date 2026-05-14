@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { gstApi } from "../../api/finance";
 import { toastSuccess, toastError } from "../../utils/toast";
 import PageMeta from "../../components/common/PageMeta";
+import { PaginatedTable } from "../../components/table";
 
 const statusColors: Record<string, string> = {
   DRAFT: "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300",
@@ -10,8 +11,18 @@ const statusColors: Record<string, string> = {
   RECONCILED: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type R = any;
+interface R {
+  id: number;
+  period: string;
+  returnType: string;
+  taxableAmount?: number;
+  cgst?: number;
+  sgst?: number;
+  igst?: number;
+  totalTax?: number;
+  status: string;
+  arn?: string;
+}
 
 export default function GstReturnsPage() {
   const [tab, setTab] = useState<"gstr1" | "gstr3b" | "recon2b">("gstr1");
@@ -24,7 +35,7 @@ export default function GstReturnsPage() {
     setLoading(true);
     try {
       const resp = await gstApi.list({ returnType: tab.toUpperCase() });
-      setReturns(resp.data ?? resp ?? []);
+      setReturns(resp.data ?? []);
     } catch { setReturns([]); }
     setLoading(false);
   }, [tab]);
@@ -81,6 +92,8 @@ export default function GstReturnsPage() {
 
         {/* Table */}
         {loading ? <p className="text-gray-500 dark:text-gray-400">Loading…</p> : (
+          <PaginatedTable data={returns} pageSize={20}>
+            {(pageData) => (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700">
@@ -91,7 +104,7 @@ export default function GstReturnsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {returns.map((r: R) => (
+                {pageData.map((r: R) => (
                   <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{r.period}</td>
                     <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{r.returnType}</td>
@@ -111,10 +124,12 @@ export default function GstReturnsPage() {
                     </td>
                   </tr>
                 ))}
-                {returns.length === 0 && <tr><td colSpan={10} className="px-4 py-6 text-center text-gray-400">No returns found</td></tr>}
+                {pageData.length === 0 && <tr><td colSpan={10} className="px-4 py-6 text-center text-gray-400">No returns found</td></tr>}
               </tbody>
             </table>
           </div>
+            )}
+          </PaginatedTable>
         )}
       </div>
     </>

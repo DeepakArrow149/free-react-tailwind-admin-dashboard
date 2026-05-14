@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { samplingApi } from "../../api/sampling";
 import { toastSuccess, toastError } from "../../utils/toast";
 import PageMeta from "../../components/common/PageMeta";
+import { Pagination } from "../../components/table";
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
@@ -15,8 +16,19 @@ const statusColors: Record<string, string> = {
   IN_PROGRESS: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type R = any;
+interface R {
+  id: number;
+  sampleNo: string;
+  buyer?: { name: string };
+  buyerId?: number;
+  style?: { styleNo: string };
+  styleId?: number;
+  sampleType?: string;
+  type?: string;
+  status: string;
+  requestDate?: string;
+  dueDate?: string;
+}
 
 export default function SamplingPage() {
   const [samples, setSamples] = useState<R[]>([]);
@@ -108,13 +120,15 @@ export default function SamplingPage() {
           </div>
         )}
 
-        {totalPages > 1 && (
-          <div className="flex justify-center gap-2 pt-2">
-            <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-600 dark:text-gray-300">Prev</button>
-            <span className="px-3 py-1 text-sm text-gray-600 dark:text-gray-400">Page {page} / {totalPages}</span>
-            <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-600 dark:text-gray-300">Next</button>
-          </div>
-        )}
+        <div className="mt-2 pt-2">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(p) => setPage(p)}
+            totalItems={total}
+            pageSize={20}
+          />
+        </div>
       </div>
     </>
   );

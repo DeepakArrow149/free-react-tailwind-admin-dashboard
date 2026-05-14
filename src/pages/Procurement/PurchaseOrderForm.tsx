@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { purchaseOrderApi } from "../../api/procurement";
+import { purchaseOrderSchema } from "../../utils/form-schemas";
+import { toast } from "sonner";
 import PageMeta from "../../components/common/PageMeta";
+import { downloadPdf } from "../../utils/downloadPdf";
 
 interface LineItem {
   materialId?: number;
@@ -31,6 +34,7 @@ export default function PurchaseOrderForm() {
   const [lines, setLines] = useState<LineItem[]>([emptyLine()]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEdit);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!id) return;
@@ -66,14 +70,45 @@ export default function PurchaseOrderForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.supplierId) return alert("Select a supplier");
+    setFieldErrors({});
+
+    // Build the payload and validate with Zod
+    const payload = {
+      supplierId: form.supplierId,
+      poDate: form.poDate,
+      deliveryDate: form.expectedDate || undefined,
+      currency: form.currency,
+      paymentTerms: form.paymentTerms || undefined,
+      remarks: form.remarks || undefined,
+      details: lines.map(l => ({
+        materialId: l.materialId || 0,
+        description: l.itemDescription,
+        uom: l.unit,
+        quantity: l.qty,
+        unitPrice: l.unitPrice,
+        taxPercent: l.taxPct || undefined,
+      })),
+    };
+
+    const result = purchaseOrderSchema.safeParse(payload);
+    if (!result.success) {
+      const errs: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        errs[issue.path.join('.')] = issue.message;
+      }
+      setFieldErrors(errs);
+      const firstErr = result.error.issues[0]?.message || 'Please fix the form errors';
+      toast.error(firstErr);
+      return;
+    }
+
     setSaving(true);
     try {
-      const payload = { ...form, details: lines };
+      const submitPayload = { ...form, details: lines };
       if (isEdit) {
-        await purchaseOrderApi.update(Number(id), payload);
+        await purchaseOrderApi.update(Number(id), submitPayload);
       } else {
-        await purchaseOrderApi.create(payload);
+        await purchaseOrderApi.create(submitPayload);
       }
       navigate("/procurement/po");
     } catch (err) { console.error(err); }
@@ -87,7 +122,7 @@ export default function PurchaseOrderForm() {
       <PageMeta title={`${isEdit ? "Edit" : "New"} Purchase Order | STITCH ERP`} description="Purchase order form" />
       <div className="p-6 max-w-5xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+          <button type="button" onClick={() => navigate(-1)} title="Back" aria-label="Back" className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{isEdit ? "Edit Purchase Order" : "New Purchase Order"}</h1>
@@ -98,12 +133,13 @@ export default function PurchaseOrderForm() {
           <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Supplier ID *</label>
-              <input type="number" required value={form.supplierId || ""} onChange={(e) => setForm({ ...form, supplierId: parseInt(e.target.value) || 0 })}
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2 text-sm dark:text-white" />
+              <input aria-label="Supplier ID" title="Supplier ID" type="number" required value={form.supplierId || ""} onChange={(e) => setForm({ ...form, supplierId: parseInt(e.target.value) || 0 })}
+                className={`w-full rounded-lg border ${fieldErrors['supplierId'] ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-900 px-4 py-2 text-sm dark:text-white`} />
+              {fieldErrors['supplierId'] && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{fieldErrors['supplierId']}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">PO Type</label>
-              <select value={form.poType} onChange={(e) => setForm({ ...form, poType: e.target.value })}
+              <select aria-label="PO Type" title="PO Type" value={form.poType} onChange={(e) => setForm({ ...form, poType: e.target.value })}
                 className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2 text-sm dark:text-white">
                 <option value="RAW_MATERIAL">Raw Material</option>
                 <option value="PROCESS">Process</option>
@@ -115,27 +151,27 @@ export default function PurchaseOrderForm() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">PO Date *</label>
-              <input type="date" required value={form.poDate} onChange={(e) => setForm({ ...form, poDate: e.target.value })}
+              <input aria-label="PO Date" title="PO Date" type="date" required value={form.poDate} onChange={(e) => setForm({ ...form, poDate: e.target.value })}
                 className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2 text-sm dark:text-white" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expected Date</label>
-              <input type="date" value={form.expectedDate} onChange={(e) => setForm({ ...form, expectedDate: e.target.value })}
+              <input aria-label="Expected Date" title="Expected Date" type="date" value={form.expectedDate} onChange={(e) => setForm({ ...form, expectedDate: e.target.value })}
                 className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2 text-sm dark:text-white" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Buyer Order ID</label>
-              <input type="number" value={form.orderId || ""} onChange={(e) => setForm({ ...form, orderId: parseInt(e.target.value) || undefined })}
+              <input aria-label="Buyer Order ID" title="Buyer Order ID" type="number" value={form.orderId || ""} onChange={(e) => setForm({ ...form, orderId: parseInt(e.target.value) || undefined })}
                 className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2 text-sm dark:text-white" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Payment Terms</label>
-              <input value={form.paymentTerms} onChange={(e) => setForm({ ...form, paymentTerms: e.target.value })}
+              <input aria-label="Payment Terms" title="Payment Terms" value={form.paymentTerms} onChange={(e) => setForm({ ...form, paymentTerms: e.target.value })}
                 className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2 text-sm dark:text-white" />
             </div>
             <div className="sm:col-span-3">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Remarks</label>
-              <textarea value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} rows={2}
+              <textarea aria-label="Remarks" title="Remarks" value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} rows={2}
                 className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2 text-sm dark:text-white" />
             </div>
           </div>
@@ -166,23 +202,23 @@ export default function PurchaseOrderForm() {
                     return (
                       <tr key={i} className="border-b border-gray-50 dark:border-gray-800">
                         <td className="px-2 py-1">
-                          <input required value={l.itemDescription} onChange={(e) => updateLine(i, "itemDescription", e.target.value)}
+                          <input aria-label="Description" title="Description" required value={l.itemDescription} onChange={(e) => updateLine(i, "itemDescription", e.target.value)}
                             className="w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm dark:text-white" />
                         </td>
                         <td className="px-2 py-1">
-                          <input type="number" required value={l.qty || ""} onChange={(e) => updateLine(i, "qty", parseFloat(e.target.value) || 0)}
+                          <input aria-label="Quantity" title="Quantity" type="number" required value={l.qty || ""} onChange={(e) => updateLine(i, "qty", parseFloat(e.target.value) || 0)}
                             className="w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-right dark:text-white" />
                         </td>
                         <td className="px-2 py-1">
-                          <input value={l.unit} onChange={(e) => updateLine(i, "unit", e.target.value)}
+                          <input aria-label="Unit" title="Unit" value={l.unit} onChange={(e) => updateLine(i, "unit", e.target.value)}
                             className="w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm dark:text-white" />
                         </td>
                         <td className="px-2 py-1">
-                          <input type="number" step="0.01" required value={l.unitPrice || ""} onChange={(e) => updateLine(i, "unitPrice", parseFloat(e.target.value) || 0)}
+                          <input aria-label="Unit price" title="Unit price" type="number" step="0.01" required value={l.unitPrice || ""} onChange={(e) => updateLine(i, "unitPrice", parseFloat(e.target.value) || 0)}
                             className="w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-right dark:text-white" />
                         </td>
                         <td className="px-2 py-1">
-                          <input type="number" value={l.taxPct || ""} onChange={(e) => updateLine(i, "taxPct", parseFloat(e.target.value) || 0)}
+                          <input aria-label="Tax percent" title="Tax percent" type="number" value={l.taxPct || ""} onChange={(e) => updateLine(i, "taxPct", parseFloat(e.target.value) || 0)}
                             className="w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-right dark:text-white" />
                         </td>
                         <td className="px-2 py-1 text-right font-medium text-gray-900 dark:text-white">{lineTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</td>
@@ -209,6 +245,11 @@ export default function PurchaseOrderForm() {
 
           <div className="flex items-center justify-end gap-3">
             <button type="button" onClick={() => navigate(-1)} className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800">Cancel</button>
+            {isEdit && (
+              <button type="button" onClick={() => downloadPdf('purchase-order', Number(id))} className="rounded-lg border border-purple-300 dark:border-purple-600 px-4 py-2 text-sm font-medium text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition">
+                Download PDF
+              </button>
+            )}
             <button type="submit" disabled={saving} className="rounded-lg bg-brand-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50 transition">
               {saving ? "Saving..." : isEdit ? "Update PO" : "Create PO"}
             </button>

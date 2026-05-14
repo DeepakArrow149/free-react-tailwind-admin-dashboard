@@ -79,7 +79,7 @@ export default function BuyingAgentList() {
             <h2 className="text-lg font-semibold text-gray-800 dark:text-white/90">Buying Agent Master</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">{items.length} agent(s)</p>
           </div>
-          <button onClick={() => { showForm ? resetForm() : setShowForm(true); }} className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600">
+          <button onClick={() => { if (showForm) { resetForm(); } else { setShowForm(true); } }} className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600">
             {showForm ? "Cancel" : (
               <><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 4.167v11.666M4.167 10h11.666" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>Add Agent</>
             )}

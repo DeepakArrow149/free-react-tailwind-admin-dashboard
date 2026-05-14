@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import PageMeta from '../../components/common/PageMeta';
+import { Pagination } from '../../components/table';
 import { claimApi, BuyerClaim } from '../../api/quality';
 
 const statusBadge = (s: string) => {
@@ -37,8 +38,8 @@ export default function BuyerClaimsPage() {
     const params: Record<string, string | number | undefined> = { page, limit: 20 };
     if (filterStatus) params.status = filterStatus;
     const res = await claimApi.list(params);
-    setItems(res.data.data.data);
-    setTotalPages(res.data.data.totalPages);
+    setItems(res.data.data || []);
+    setTotalPages(res.data.meta?.totalPages ?? 1);
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -79,13 +80,13 @@ export default function BuyerClaimsPage() {
         {showForm && (
           <div className="mb-6 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-3">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <div><label className="block text-xs text-gray-500 mb-1">Order ID*</label><input type="number" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.orderId ?? ''} onChange={e => setForm({ ...form, orderId: +e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">Buyer ID*</label><input type="number" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.buyerId ?? ''} onChange={e => setForm({ ...form, buyerId: +e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">Claim Date*</label><input type="date" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.claimDate ?? ''} onChange={e => setForm({ ...form, claimDate: e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Order ID*</label><input type="number" aria-label="Order ID" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.orderId ?? ''} onChange={e => setForm({ ...form, orderId: +e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Buyer ID*</label><input type="number" aria-label="Buyer ID" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.buyerId ?? ''} onChange={e => setForm({ ...form, buyerId: +e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Claim Date*</label><input type="date" aria-label="Claim Date" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.claimDate ?? ''} onChange={e => setForm({ ...form, claimDate: e.target.value })} /></div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               <div><label className="block text-xs text-gray-500 mb-1">Claim Type*</label>
-                <select className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.claimType} onChange={e => setForm({ ...form, claimType: e.target.value })}>
+                <select aria-label="Claim Type" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.claimType} onChange={e => setForm({ ...form, claimType: e.target.value })}>
                   <option value="QUALITY_DEFECT">Quality Defect</option>
                   <option value="SHORT_SHIPMENT">Short Shipment</option>
                   <option value="LATE_DELIVERY">Late Delivery</option>
@@ -94,21 +95,21 @@ export default function BuyerClaimsPage() {
                   <option value="OTHER">Other</option>
                 </select>
               </div>
-              <div><label className="block text-xs text-gray-500 mb-1">Claimed Amount*</label><input type="number" step="0.01" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.claimedAmount ?? ''} onChange={e => setForm({ ...form, claimedAmount: +e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Claimed Amount*</label><input type="number" step="0.01" aria-label="Claimed Amount" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.claimedAmount ?? ''} onChange={e => setForm({ ...form, claimedAmount: +e.target.value })} /></div>
               <div><label className="block text-xs text-gray-500 mb-1">Currency</label>
-                <select className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.currency} onChange={e => setForm({ ...form, currency: e.target.value })}>
+                <select aria-label="Currency" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.currency} onChange={e => setForm({ ...form, currency: e.target.value })}>
                   <option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="INR">INR</option>
                 </select>
               </div>
             </div>
-            <div><label className="block text-xs text-gray-500 mb-1">Description*</label><textarea className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" rows={2} value={form.description ?? ''} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
-            <div><label className="block text-xs text-gray-500 mb-1">Remarks</label><textarea className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" rows={2} value={form.remarks ?? ''} onChange={e => setForm({ ...form, remarks: e.target.value })} /></div>
+            <div><label className="block text-xs text-gray-500 mb-1">Description*</label><textarea aria-label="Description" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" rows={2} value={form.description ?? ''} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
+            <div><label className="block text-xs text-gray-500 mb-1">Remarks</label><textarea aria-label="Remarks" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" rows={2} value={form.remarks ?? ''} onChange={e => setForm({ ...form, remarks: e.target.value })} /></div>
             <button onClick={handleCreate} className="px-5 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">Create Claim</button>
           </div>
         )}
 
         <div className="flex gap-3 mb-4">
-          <select className="border rounded px-3 py-1.5 text-sm dark:bg-gray-800 dark:border-gray-700" value={filterStatus} onChange={e => { setFilterStatus(e.target.value); setPage(1); }}>
+          <select aria-label="Status filter" className="border rounded px-3 py-1.5 text-sm dark:bg-gray-800 dark:border-gray-700" value={filterStatus} onChange={e => { setFilterStatus(e.target.value); setPage(1); }}>
             <option value="">All Status</option>
             <option value="OPEN">Open</option><option value="UNDER_REVIEW">Under Review</option>
             <option value="ACCEPTED">Accepted</option><option value="REJECTED">Rejected</option>
@@ -155,10 +156,13 @@ export default function BuyerClaimsPage() {
             </tbody>
           </table>
         </div>
-        <div className="flex justify-between items-center mt-3">
-          <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-700">Prev</button>
-          <span className="text-sm text-gray-500">Page {page}/{totalPages}</span>
-          <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-700">Next</button>
+        <div className="mt-3">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(p) => setPage(p)}
+            pageSize={20}
+          />
         </div>
       </div>
     </>

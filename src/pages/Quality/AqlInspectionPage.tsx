@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import PageMeta from '../../components/common/PageMeta';
+import { Pagination } from '../../components/table';
 import { aqlApi, AqlInspection, AqlCalculateResult } from '../../api/quality';
 
 const TABS = ['Inspections', 'AQL Calculator', 'New Inspection'] as const;
@@ -58,8 +59,8 @@ export default function AqlInspectionPage() {
     const params: Record<string, string | number | undefined> = { page, limit: 20 };
     if (filterOrderId) params.orderId = filterOrderId;
     const res = await aqlApi.list(params);
-    setItems(res.data.data.data);
-    setTotalPages(res.data.data.totalPages);
+    setItems(res.data.data || []);
+    setTotalPages(res.data.meta?.totalPages ?? 1);
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -106,7 +107,7 @@ export default function AqlInspectionPage() {
         {tab === 'Inspections' && (
           <>
             <div className="flex gap-3 mb-4">
-              <input className="border rounded px-3 py-1.5 text-sm dark:bg-gray-800 dark:border-gray-700" placeholder="Filter Order ID" value={filterOrderId} onChange={e => { setFilterOrderId(e.target.value); setPage(1); }} />
+              <input aria-label="Filter Order ID" className="border rounded px-3 py-1.5 text-sm dark:bg-gray-800 dark:border-gray-700" placeholder="Filter Order ID" value={filterOrderId} onChange={e => { setFilterOrderId(e.target.value); setPage(1); }} />
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -133,25 +134,28 @@ export default function AqlInspectionPage() {
                 </tbody>
               </table>
             </div>
-            <div className="flex justify-between items-center mt-3">
-              <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-700">Prev</button>
-              <span className="text-sm text-gray-500">Page {page}/{totalPages}</span>
-              <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="px-3 py-1 text-sm border rounded disabled:opacity-40 dark:border-gray-700">Next</button>
+            <div className="mt-3">
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={(p) => setPage(p)}
+                pageSize={20}
+              />
             </div>
           </>
         )}
 
         {tab === 'AQL Calculator' && (
           <div className="max-w-md space-y-3">
-            <div><label className="block text-xs text-gray-500 mb-1">Lot Qty</label><input type="number" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={calcLot} onChange={e => setCalcLot(+e.target.value)} /></div>
+            <div><label className="block text-xs text-gray-500 mb-1">Lot Qty</label><input type="number" aria-label="Lot Qty" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={calcLot} onChange={e => setCalcLot(+e.target.value)} /></div>
             <div><label className="block text-xs text-gray-500 mb-1">Inspection Level</label>
-              <select className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={calcLevel} onChange={e => setCalcLevel(e.target.value)}>
+              <select aria-label="Inspection Level" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={calcLevel} onChange={e => setCalcLevel(e.target.value)}>
                 <option value="I">Level I (Reduced)</option><option value="II">Level II (Normal)</option><option value="III">Level III (Tightened)</option>
               </select>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="block text-xs text-gray-500 mb-1">AQL Major</label><input type="number" step="0.1" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={calcMajor} onChange={e => setCalcMajor(+e.target.value)} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">AQL Minor</label><input type="number" step="0.1" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={calcMinor} onChange={e => setCalcMinor(+e.target.value)} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">AQL Major</label><input type="number" step="0.1" aria-label="AQL Major" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={calcMajor} onChange={e => setCalcMajor(+e.target.value)} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">AQL Minor</label><input type="number" step="0.1" aria-label="AQL Minor" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={calcMinor} onChange={e => setCalcMinor(+e.target.value)} /></div>
             </div>
             <button onClick={handleCalc} className="px-4 py-2 bg-blue-600 text-white rounded text-sm">Calculate</button>
             {calcResult && (
@@ -168,39 +172,39 @@ export default function AqlInspectionPage() {
         {tab === 'New Inspection' && (
           <div className="space-y-3 max-w-lg">
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="block text-xs text-gray-500 mb-1">Order ID*</label><input type="number" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.orderId ?? ''} onChange={e => setForm({ ...form, orderId: +e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">Inspection Date*</label><input type="date" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectionDate ?? ''} onChange={e => setForm({ ...form, inspectionDate: e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Order ID*</label><input type="number" aria-label="Order ID" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.orderId ?? ''} onChange={e => setForm({ ...form, orderId: +e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Inspection Date*</label><input type="date" aria-label="Inspection Date" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectionDate ?? ''} onChange={e => setForm({ ...form, inspectionDate: e.target.value })} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="block text-xs text-gray-500 mb-1">Lot Qty*</label><input type="number" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.lotQty} onChange={e => setForm({ ...form, lotQty: +e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Lot Qty*</label><input type="number" aria-label="Lot Qty" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.lotQty} onChange={e => setForm({ ...form, lotQty: +e.target.value })} /></div>
               <div><label className="block text-xs text-gray-500 mb-1">Type</label>
-                <select className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectionType} onChange={e => setForm({ ...form, inspectionType: e.target.value })}>
+                <select aria-label="Inspection Type" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectionType} onChange={e => setForm({ ...form, inspectionType: e.target.value })}>
                   <option value="INLINE">Inline</option><option value="FINAL">Final</option><option value="PRE_SHIPMENT">Pre-Shipment</option>
                 </select>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div><label className="block text-xs text-gray-500 mb-1">Level</label>
-                <select className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectionLevel} onChange={e => setForm({ ...form, inspectionLevel: e.target.value })}>
+                <select aria-label="Inspection Level" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectionLevel} onChange={e => setForm({ ...form, inspectionLevel: e.target.value })}>
                   <option value="I">I</option><option value="II">II</option><option value="III">III</option>
                 </select>
               </div>
-              <div><label className="block text-xs text-gray-500 mb-1">AQL Major</label><input type="number" step="0.1" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.aqlMajor} onChange={e => setForm({ ...form, aqlMajor: +e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">AQL Minor</label><input type="number" step="0.1" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.aqlMinor} onChange={e => setForm({ ...form, aqlMinor: +e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">AQL Major</label><input type="number" step="0.1" aria-label="AQL Major" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.aqlMajor} onChange={e => setForm({ ...form, aqlMajor: +e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">AQL Minor</label><input type="number" step="0.1" aria-label="AQL Minor" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.aqlMinor} onChange={e => setForm({ ...form, aqlMinor: +e.target.value })} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="block text-xs text-gray-500 mb-1">Inspector</label><input className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectorName ?? ''} onChange={e => setForm({ ...form, inspectorName: e.target.value })} /></div>
-              <div><label className="block text-xs text-gray-500 mb-1">Buyer QC</label><input className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.buyerQcName ?? ''} onChange={e => setForm({ ...form, buyerQcName: e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Inspector</label><input aria-label="Inspector" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.inspectorName ?? ''} onChange={e => setForm({ ...form, inspectorName: e.target.value })} /></div>
+              <div><label className="block text-xs text-gray-500 mb-1">Buyer QC</label><input aria-label="Buyer QC" className="border rounded px-3 py-1.5 text-sm w-full dark:bg-gray-800 dark:border-gray-700" value={form.buyerQcName ?? ''} onChange={e => setForm({ ...form, buyerQcName: e.target.value })} /></div>
             </div>
 
             <h4 className="text-sm font-medium mt-4 text-gray-700 dark:text-gray-300">Defect Entries</h4>
             <div className="flex items-end gap-2">
-              <input className="border rounded px-2 py-1 text-xs w-20 dark:bg-gray-800 dark:border-gray-700" placeholder="Code" value={defectRow.defectCode} onChange={e => setDefectRow({ ...defectRow, defectCode: e.target.value })} />
-              <input className="border rounded px-2 py-1 text-xs flex-1 dark:bg-gray-800 dark:border-gray-700" placeholder="Name" value={defectRow.defectName} onChange={e => setDefectRow({ ...defectRow, defectName: e.target.value })} />
-              <select className="border rounded px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700" value={defectRow.defectCategory} onChange={e => setDefectRow({ ...defectRow, defectCategory: e.target.value })}>
+              <input aria-label="Defect Code" className="border rounded px-2 py-1 text-xs w-20 dark:bg-gray-800 dark:border-gray-700" placeholder="Code" value={defectRow.defectCode} onChange={e => setDefectRow({ ...defectRow, defectCode: e.target.value })} />
+              <input aria-label="Defect Name" className="border rounded px-2 py-1 text-xs flex-1 dark:bg-gray-800 dark:border-gray-700" placeholder="Name" value={defectRow.defectName} onChange={e => setDefectRow({ ...defectRow, defectName: e.target.value })} />
+              <select aria-label="Defect Category" className="border rounded px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700" value={defectRow.defectCategory} onChange={e => setDefectRow({ ...defectRow, defectCategory: e.target.value })}>
                 <option value="CRITICAL">Critical</option><option value="MAJOR">Major</option><option value="MINOR">Minor</option>
               </select>
-              <input type="number" className="border rounded px-2 py-1 text-xs w-14 dark:bg-gray-800 dark:border-gray-700" value={defectRow.count} onChange={e => setDefectRow({ ...defectRow, count: +e.target.value })} />
+              <input type="number" aria-label="Defect Count" className="border rounded px-2 py-1 text-xs w-14 dark:bg-gray-800 dark:border-gray-700" value={defectRow.count} onChange={e => setDefectRow({ ...defectRow, count: +e.target.value })} />
               <button onClick={addDefect} className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">Add</button>
             </div>
             {form.defectEntries.length > 0 && (

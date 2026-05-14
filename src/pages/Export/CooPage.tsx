@@ -11,7 +11,7 @@ export default function CooPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    try { const { data } = await cooApi.list(); setItems(data.data); } catch { toast.error('Failed to load COO'); }
+    try { const { data } = await cooApi.list(); setItems(data.data || []); } catch { toast.error('Failed to load COO'); }
     setLoading(false);
   }, []);
 

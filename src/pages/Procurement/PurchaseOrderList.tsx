@@ -2,9 +2,12 @@ import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router";
 import { purchaseOrderApi, type PurchaseOrder } from "../../api/procurement";
 import { excelExportApi } from "../../api/export";
+import { PO_STATUSES } from '@erp/shared-types';
 import { toastError } from "../../utils/toast";
 import PageMeta from "../../components/common/PageMeta";
 import TableSkeleton from "../../components/common/TableSkeleton";
+import { PaginatedTable } from "../../components/table";
+import { downloadPdf } from "../../utils/downloadPdf";
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
@@ -32,7 +35,7 @@ export default function PurchaseOrderList() {
         search: search || undefined,
         status: statusFilter || undefined,
       });
-      setOrders(resp.data || []);
+      setOrders(resp.data?.data || []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   }, [search, statusFilter]);
@@ -76,16 +79,13 @@ export default function PurchaseOrderList() {
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
             className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm dark:text-white">
             <option value="">All Status</option>
-            <option value="DRAFT">Draft</option>
-            <option value="APPROVED">Approved</option>
-            <option value="PARTIALLY_RECEIVED">Partially Received</option>
-            <option value="FULLY_RECEIVED">Fully Received</option>
-            <option value="CLOSED">Closed</option>
-            <option value="CANCELLED">Cancelled</option>
+            {PO_STATUSES.map(s => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
           </select>
         </div>
 
         {/* Table */}
+        <PaginatedTable data={orders} pageSize={20}>
+          {(pageData) => (
         <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-900/50">
@@ -104,7 +104,7 @@ export default function PurchaseOrderList() {
                 <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400"><TableSkeleton rows={6} cols={7} /></td></tr>
               ) : orders.length === 0 ? (
                 <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">No purchase orders found</td></tr>
-              ) : orders.map((po) => (
+              ) : pageData.map((po) => (
                 <tr key={po.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
                   <td className="px-4 py-3">
                     <Link to={`/procurement/po/${po.id}`} className="font-medium text-brand-600 dark:text-brand-400 hover:underline">{po.poNo}</Link>
@@ -124,6 +124,7 @@ export default function PurchaseOrderList() {
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Link to={`/procurement/po/${po.id}`} className="text-xs text-brand-600 hover:underline">View</Link>
+                      <button onClick={() => downloadPdf('purchase-order', po.id)} className="text-xs text-purple-600 hover:underline">PDF</button>
                       {po.status === "DRAFT" && (
                         <>
                           <button onClick={() => handleApprove(po.id)} className="text-xs text-green-600 hover:underline">Approve</button>
@@ -137,6 +138,8 @@ export default function PurchaseOrderList() {
             </tbody>
           </table>
         </div>
+          )}
+        </PaginatedTable>
       </div>
     </>
   );

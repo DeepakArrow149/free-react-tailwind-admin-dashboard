@@ -46,15 +46,15 @@ export default function MISDashboard() {
 
   /* ── derived KPIs ── */
   const statusCounts = orderStats?.statusCounts ?? [];
-  const totalOrders = statusCounts.reduce((s: number, r: Any) => s + (r._count?._all ?? 0), 0);
-  const totalQty = statusCounts.reduce((s: number, r: Any) => s + (r._sum?.totalQty ?? 0), 0);
-  const totalValue = statusCounts.reduce((s: number, r: Any) => s + (r._sum?.totalValue ?? 0), 0);
-  const activeOrders = statusCounts.filter((r: Any) => ["CONFIRMED", "IN_PRODUCTION"].includes(r.status)).reduce((s: number, r: Any) => s + (r._count?._all ?? 0), 0);
+  const totalOrders = statusCounts.reduce((s: number, r: Any) => s + Number(r._count?.id ?? 0), 0);
+  const totalQty = statusCounts.reduce((s: number, r: Any) => s + Number(r._sum?.totalQty ?? 0), 0);
+  const totalValue = statusCounts.reduce((s: number, r: Any) => s + Number(r._sum?.totalValue ?? 0), 0);
+  const activeOrders = statusCounts.filter((r: Any) => ["CONFIRMED", "IN_PRODUCTION"].includes(r.status)).reduce((s: number, r: Any) => s + Number(r._count?.id ?? 0), 0);
 
-  const prodTotal = prodDash.reduce((s: number, r: Any) => s + (r.orderQty ?? 0), 0);
-  const prodOutput = prodDash.reduce((s: number, r: Any) => s + (r.totalOutput ?? 0), 0);
-  const prodReject = prodDash.reduce((s: number, r: Any) => s + (r.totalReject ?? 0), 0);
-  const avgCompletion = prodDash.length ? Math.round(prodDash.reduce((s: number, r: Any) => s + (r.completionPct ?? 0), 0) / prodDash.length) : 0;
+  const prodTotal = prodDash.reduce((s: number, r: Any) => s + Number(r.orderQty ?? 0), 0);
+  const prodOutput = prodDash.reduce((s: number, r: Any) => s + Number(r.totalOutput ?? 0), 0);
+  const prodReject = prodDash.reduce((s: number, r: Any) => s + Number(r.totalReject ?? 0), 0);
+  const avgCompletion = prodDash.length ? Math.round(prodDash.reduce((s: number, r: Any) => s + Number(r.completionPct ?? 0), 0) / prodDash.length) : 0;
 
   const machByStatus = machineStats?.machinesByStatus ?? [];
   const totalMachines = machByStatus.reduce((s: number, r: Any) => s + (r._count ?? r.count ?? 0), 0);
@@ -103,9 +103,9 @@ export default function MISDashboard() {
               ) : (
                 <div className="space-y-3">
                   {statusCounts.map((row: Any) => {
-                    const count = row._count?._all ?? 0;
-                    const qty = row._sum?.totalQty ?? 0;
-                    const val = row._sum?.totalValue ?? 0;
+                    const count = Number(row._count?.id ?? 0);
+                    const qty = Number(row._sum?.totalQty ?? 0);
+                    const val = Number(row._sum?.totalValue ?? 0);
                     const widthPct = Math.max(pct(count, totalOrders), 3);
                     return (
                       <div key={row.status} className="flex items-center gap-3">
@@ -144,16 +144,16 @@ export default function MISDashboard() {
                         {prodDash.slice(0, 10).map((r: Any, i: number) => (
                           <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                             <td className="px-2 py-2 font-medium text-gray-800 dark:text-white">{r.orderNo ?? `#${r.orderId}`}</td>
-                            <td className="px-2 py-2 text-gray-600 dark:text-gray-300">{fmt(r.orderQty ?? 0)}</td>
-                            <td className="px-2 py-2 text-green-600 dark:text-green-400">{fmt(r.totalOutput ?? 0)}</td>
-                            <td className="px-2 py-2 text-red-600 dark:text-red-400">{fmt(r.totalReject ?? 0)}</td>
+                            <td className="px-2 py-2 text-gray-600 dark:text-gray-300">{fmt(Number(r.orderQty ?? 0))}</td>
+                            <td className="px-2 py-2 text-green-600 dark:text-green-400">{fmt(Number(r.totalOutput ?? 0))}</td>
+                            <td className="px-2 py-2 text-red-600 dark:text-red-400">{fmt(Number(r.totalReject ?? 0))}</td>
                             <td className="px-2 py-2">
                               <div className="flex items-center gap-2">
                                 <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                                  <div className={`h-full rounded-full ${(r.completionPct ?? 0) >= 90 ? "bg-green-500" : (r.completionPct ?? 0) >= 50 ? "bg-blue-500" : "bg-amber-500"}`}
-                                    style={{ width: `${Math.min(r.completionPct ?? 0, 100)}%` }} />
+                                  <div className={`h-full rounded-full ${Number(r.completionPct ?? 0) >= 90 ? "bg-green-500" : Number(r.completionPct ?? 0) >= 50 ? "bg-blue-500" : "bg-amber-500"}`}
+                                    style={{ width: `${Math.min(Number(r.completionPct ?? 0), 100)}%` }} />
                                 </div>
-                                <span className="text-gray-600 dark:text-gray-400 w-8 text-right">{r.completionPct ?? 0}%</span>
+                                <span className="text-gray-600 dark:text-gray-400 w-8 text-right">{Number(r.completionPct ?? 0)}%</span>
                               </div>
                             </td>
                           </tr>

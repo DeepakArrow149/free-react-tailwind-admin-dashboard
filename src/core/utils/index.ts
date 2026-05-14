@@ -53,6 +53,20 @@ export function formatDate(
 }
 
 /**
+ * Format a date string in short dd-MMM-yyyy format (en-IN locale)
+ */
+export function formatDateShort(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+/**
+ * Format a date-time string for display
+ */
+export function formatDateTime(d: string | null | undefined): string {
+  return d ? new Date(d).toLocaleString() : '\u2014';
+}
+
+/**
  * Truncate text with ellipsis
  */
 export function truncate(text: string, maxLength: number): string {

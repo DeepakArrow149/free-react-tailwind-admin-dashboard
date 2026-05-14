@@ -14,7 +14,7 @@ export const env = {
   PROD: import.meta.env.PROD,
 
   /** API base URL for backend communication */
-  API_BASE_URL: (import.meta.env.VITE_API_BASE_URL as string) || '/api',
+  API_BASE_URL: (import.meta.env.VITE_API_BASE_URL as string) || '/api/v1',
 
   /** Application title */
   APP_TITLE: (import.meta.env.VITE_APP_TITLE as string) || 'Enterprise Admin',
